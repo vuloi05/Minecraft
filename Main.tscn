@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://cx1g0wkq3n00k"]
+[gd_scene load_steps=6 format=3 uid="uid://cx1g0wkq3n00k"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://Block.tscn" id="2_block"]
+[ext_resource type="Script" path="res://world.gd" id="2_world"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_abc12"]
+sky_top_color = Color(0.385, 0.454, 0.55, 1)
 sky_horizon_color = Color(0.646, 0.656, 0.67, 1)
 ground_horizon_color = Color(0.646, 0.656, 0.67, 1)
 
@@ -13,12 +14,6 @@ sky_material = SubResource("ProceduralSkyMaterial_abc12")
 [sub_resource type="Environment" id="Environment_ghi56"]
 background_mode = 2
 sky = SubResource("Sky_def34")
-
-[sub_resource type="BoxMesh" id="BoxMesh_floor"]
-size = Vector3(50, 1, 50)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(50, 1, 50)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 
@@ -31,17 +26,11 @@ environment = SubResource("Environment_ghi56")
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 10, 0)
 shadow_enabled = true
 
-[node name="Floor" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
-mesh = SubResource("BoxMesh_floor")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
-shape = SubResource("BoxShape3D_floor")
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("2_world")
 
 [node name="Player" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 18, 8)
 script = ExtResource("1_script")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
@@ -52,9 +41,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="RayCast3D" type="RayCast3D" parent="Player/Camera3D"]
 target_position = Vector3(0, 0, -5)
-
-[node name="Block" parent="." instance=ExtResource("2_block")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -4)
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchors_preset = 15
