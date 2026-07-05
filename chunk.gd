@@ -160,19 +160,28 @@ func create_block_mesh(x: int, y: int, z: int, block_id: int):
 		color_bottom = Color(0.52, 0.37, 0.26) # Mặt đất nâu
 		color_side = Color(0.52, 0.37, 0.26) # Cạnh bên nâu
 	
-	# Nếu là Đuốc (ID=5), khối sẽ nhỏ hơn bình thường (scale 0.2)
-	var size = 0.5
-	if block_id == 5:
-		size = 0.1
+	var size_x = 0.5
+	var size_y = 0.5
+	var size_z = 0.5
+	var offset_y = 0.0
+	
+	if block_id == 5: # Đuốc
+		size_x = 0.06
+		size_y = 0.3
+		size_z = 0.06
+		offset_y = -0.2 # Kéo xuống chạm đáy ô
+		color_top = Color(1.0, 0.9, 0.2) # Lửa
+		color_side = Color(0.5, 0.3, 0.1) # Thân gỗ
+		color_bottom = Color(0.5, 0.3, 0.1)
 		
-	var v0 = pos + Vector3(-size, -size, -size)
-	var v1 = pos + Vector3(size, -size, -size)
-	var v2 = pos + Vector3(size, size, -size)
-	var v3 = pos + Vector3(-size, size, -size)
-	var v4 = pos + Vector3(-size, -size, size)
-	var v5 = pos + Vector3(size, -size, size)
-	var v6 = pos + Vector3(size, size, size)
-	var v7 = pos + Vector3(-size, size, size)
+	var v0 = pos + Vector3(-size_x, -size_y + offset_y, -size_z)
+	var v1 = pos + Vector3(size_x, -size_y + offset_y, -size_z)
+	var v2 = pos + Vector3(size_x, size_y + offset_y, -size_z)
+	var v3 = pos + Vector3(-size_x, size_y + offset_y, -size_z)
+	var v4 = pos + Vector3(-size_x, -size_y + offset_y, size_z)
+	var v5 = pos + Vector3(size_x, -size_y + offset_y, size_z)
+	var v6 = pos + Vector3(size_x, size_y + offset_y, size_z)
+	var v7 = pos + Vector3(-size_x, size_y + offset_y, size_z)
 
 	if get_block(x, y, z + 1) == 0: add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
 	if get_block(x, y, z - 1) == 0: add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
