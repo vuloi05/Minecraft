@@ -28,9 +28,9 @@ func _ready():
 	world_node = get_parent().get_node("World")
 	if has_node("../UI"):
 		ui = get_node("../UI")
-		ui.update_hp(hp)
-		ui.update_hunger(hunger)
-		ui.update_inventory(inventory_rocks)
+		ui.call_deferred("update_hp", hp)
+		ui.call_deferred("update_hunger", hunger)
+		ui.call_deferred("update_inventory", inventory_rocks)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
