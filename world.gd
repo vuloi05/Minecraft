@@ -10,6 +10,9 @@ var material = StandardMaterial3D.new()
 var noise = FastNoiseLite.new()
 var player: CharacterBody3D
 
+# Hàng đợi để sinh Chunk dần dần, tránh giật lag
+var chunk_queue = []
+
 func _ready():
 	noise.seed = randi()
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -39,20 +42,33 @@ func _process(_delta):
 		
 		var player_chunk = Vector2i(pcx, pcz)
 		update_chunks(player_chunk)
+		
+		# Xử lý hàng đợi sinh Chunk (1 Chunk mỗi Frame)
+		if chunk_queue.size() > 0:
+			# Sắp xếp ưu tiên sinh Chunk gần người chơi nhất trước
+			chunk_queue.sort_custom(func(a, b):
+				var da = abs(a.x - pcx) + abs(a.y - pcz)
+				var db = abs(b.x - pcx) + abs(b.y - pcz)
+				return da < db
+			)
+			
+			var cpos = chunk_queue.pop_front()
+			# Chỉ sinh nếu nó vẫn còn nằm trong tầm nhìn
+			if abs(cpos.x - pcx) <= RENDER_DISTANCE and abs(cpos.y - pcz) <= RENDER_DISTANCE:
+				if not chunks.has(cpos):
+					var chunk = Chunk.new(cpos, noise, material, self)
+					chunks[cpos] = chunk
+					add_child(chunk)
+					chunk.update_chunk_mesh()
+					update_neighbor_meshes(cpos)
 
 func update_chunks(player_chunk: Vector2i):
-	# Sinh chunk mới
+	# Thêm chunk mới vào hàng đợi thay vì sinh ngay lập tức
 	for x in range(-RENDER_DISTANCE, RENDER_DISTANCE + 1):
 		for z in range(-RENDER_DISTANCE, RENDER_DISTANCE + 1):
 			var cpos = player_chunk + Vector2i(x, z)
-			if not chunks.has(cpos):
-				var chunk = Chunk.new(cpos, noise, material, self)
-				chunks[cpos] = chunk
-				add_child(chunk)
-				# Gọi update_chunk_mesh cho chunk hiện tại
-				chunk.update_chunk_mesh()
-				# Nếu sinh chunk mới, cập nhật lại mặt lưới của hàng xóm
-				update_neighbor_meshes(cpos)
+			if not chunks.has(cpos) and not chunk_queue.has(cpos):
+				chunk_queue.append(cpos)
 	
 	# Xóa chunk ở xa
 	var chunks_to_remove = []
