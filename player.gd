@@ -172,9 +172,6 @@ func _physics_process(delta):
 
 	was_on_floor = is_on_floor()
 
-func finish_loading():
-	is_loading = false
-	
 	# Xử lý đào khối (Giữ chuột trái)
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if raycast.is_colliding():
@@ -235,3 +232,6 @@ func finish_loading():
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
 	move_and_slide()
+
+func finish_loading():
+	is_loading = false
