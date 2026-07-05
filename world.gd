@@ -180,7 +180,7 @@ func set_block(global_pos: Vector3, block_type: int):
 				light.light_color = Color(1.0, 0.9, 0.6)
 				light.light_energy = 2.0
 				light.omni_range = 10.0
-				light.position = pos
+				light.position = pos + Vector3(0, 0.3, 0) # Đẩy ánh sáng lên phần ngọn
 				add_child(light)
 				torches[pos] = light
 		elif block_type == 0:
