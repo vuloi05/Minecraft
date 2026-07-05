@@ -14,21 +14,21 @@ var player: CharacterBody3D
 var chunk_queue = []
 
 func _ready():
-	noise.seed = randi()
+	noise.seed = 1234
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
-	noise.frequency = 0.05
 	
 	var noise_tex = FastNoiseLite.new()
-	noise_tex.seed = randi()
+	noise_tex.seed = 1234
 	noise_tex.frequency = 0.5
 	var tex = NoiseTexture2D.new()
 	tex.noise = noise_tex
 	tex.width = 64
 	tex.height = 64
 	
-	material.albedo_color = Color(0.3, 0.6, 0.2)
+	material.albedo_color = Color(1, 1, 1) # Cho phép màu đỉnh hiển thị
 	material.albedo_texture = tex
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	material.vertex_color_use_as_albedo = true # Bật Vertex Colors
 	
 	player = get_parent().get_node("Player")
 
