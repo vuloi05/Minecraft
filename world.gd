@@ -178,6 +178,8 @@ func set_block(global_pos: Vector3, block_type: int):
 			if not torches.has(pos):
 				var light = OmniLight3D.new()
 				light.shadow_enabled = true # Bật đổ bóng để không xuyên tường
+				light.shadow_bias = 0.02 # Giảm shadow bias để không lọt sáng qua kẽ hở (Peter panning)
+				light.shadow_normal_bias = 0.0
 				light.light_color = Color(1.0, 0.9, 0.6)
 				light.light_energy = 2.0
 				light.omni_range = 10.0
