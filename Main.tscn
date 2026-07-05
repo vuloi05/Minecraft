@@ -1,10 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://cx1g0wkq3n00k"]
+[gd_scene load_steps=7 format=3 uid="uid://cx1g0wkq3n00k"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_script"]
 [ext_resource type="Script" path="res://world.gd" id="2_world"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_abc12"]
-sky_top_color = Color(0.385, 0.454, 0.55, 1)
 sky_horizon_color = Color(0.646, 0.656, 0.67, 1)
 ground_horizon_color = Color(0.646, 0.656, 0.67, 1)
 
@@ -16,6 +15,8 @@ background_mode = 2
 sky = SubResource("Sky_def34")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.3
+height = 1.8
 
 [node name="Main" type="Node3D"]
 
