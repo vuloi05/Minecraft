@@ -39,14 +39,17 @@ func generate_blocks():
 		for y in range(CHUNK_SIZE_Y):
 			blocks[x][y] = []
 			blocks[x][y].resize(CHUNK_SIZE_Z)
-			for z in range(CHUNK_SIZE_Z):
-				var global_x = chunk_pos.x * CHUNK_SIZE_X + x
-				var global_z = chunk_pos.y * CHUNK_SIZE_Z + z
-				var terrain_height = int((noise.get_noise_2d(global_x, global_z) + 1.0) * 0.5 * 20) + 10
-				if y <= terrain_height:
-					blocks[x][y][z] = 1
-				else:
-					blocks[x][y][z] = 0
+			blocks[x][y].fill(0) # Đổ đầy không khí trước
+
+	# Tính toán địa hình
+	for x in range(CHUNK_SIZE_X):
+		for z in range(CHUNK_SIZE_Z):
+			var global_x = chunk_pos.x * CHUNK_SIZE_X + x
+			var global_z = chunk_pos.y * CHUNK_SIZE_Z + z
+			var terrain_height = int((noise.get_noise_2d(global_x, global_z) + 1.0) * 0.5 * 20) + 10
+			
+			for y in range(terrain_height + 1):
+				blocks[x][y][z] = 1 # Chỉ đổ đá vào các ô dưới mặt đất
 
 func get_block(x: int, y: int, z: int) -> int:
 	if x >= 0 and x < CHUNK_SIZE_X and y >= 0 and y < CHUNK_SIZE_Y and z >= 0 and z < CHUNK_SIZE_Z:
