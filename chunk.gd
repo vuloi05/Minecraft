@@ -117,7 +117,7 @@ func update_chunk_mesh():
 			for z in range(CHUNK_SIZE_Z):
 				if blocks[x][y][z] > 0:
 					if is_block_exposed(x, y, z):
-						create_block_mesh(x, y, z, blocks[x][y][z])
+						create_block_mesh(x, y, z)
 						var shape = get_collision_shape()
 						shape.position = Vector3(x, y, z)
 						shape.disabled = false
