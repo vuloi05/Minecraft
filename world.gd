@@ -180,26 +180,33 @@ func set_block(global_pos: Vector3, block_type: int):
 				torch_node.position = pos
 				
 				# Vẽ đuốc bằng Sprite3D (Crossed planes)
-				if FileAccess.file_exists("res://Torch.webp") or FileAccess.file_exists("res://Torch.webp.import"):
-					var tex = load("res://Torch.webp") as Texture2D
-					if tex:
-						var max_dim = max(tex.get_width(), tex.get_height())
-						var p_size = 0.6 / float(max_dim) if max_dim > 0 else 0.03
-						
-						var s1 = Sprite3D.new()
-						s1.texture = tex
-						s1.pixel_size = p_size
-						s1.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-						s1.position = Vector3(0, -0.2, 0)
-						torch_node.add_child(s1)
-						
-						var s2 = Sprite3D.new()
-						s2.texture = tex
-						s2.pixel_size = p_size
-						s2.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-						s2.position = Vector3(0, -0.2, 0)
-						s2.rotation_degrees = Vector3(0, 90, 0)
-						torch_node.add_child(s2)
+				var tex = load("res://Torch.webp") as Texture2D
+				if tex != null:
+					var p_size = 0.04
+					
+					var s1 = Sprite3D.new()
+					s1.texture = tex
+					s1.pixel_size = p_size
+					s1.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+					s1.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD # Tránh lỗi chèn hình trong Godot
+					s1.position = Vector3(0, -0.2, 0)
+					torch_node.add_child(s1)
+					
+					var s2 = Sprite3D.new()
+					s2.texture = tex
+					s2.pixel_size = p_size
+					s2.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+					s2.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+					s2.position = Vector3(0, -0.2, 0)
+					s2.rotation_degrees = Vector3(0, 90, 0)
+					torch_node.add_child(s2)
+				else:
+					var mesh = MeshInstance3D.new()
+					var box = BoxMesh.new()
+					box.size = Vector3(0.1, 0.5, 0.1)
+					mesh.mesh = box
+					mesh.position = Vector3(0, -0.25, 0)
+					torch_node.add_child(mesh)
 						
 				var light = OmniLight3D.new()
 				light.shadow_enabled = true # Bật đổ bóng để không xuyên tường

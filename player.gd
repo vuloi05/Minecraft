@@ -122,7 +122,7 @@ func update_hand(id: int):
 					hand_sprite.rotation_degrees = Vector3(0, 0, 0)
 				else:
 					hand_sprite.flip_h = false
-					hand_sprite.rotation_degrees = Vector3(0, 0, 0) # Đuốc đứng thẳng
+					hand_sprite.rotation_degrees = Vector3(0, 0, -20) # Đuốc nghiêng giống cúp
 					
 				hand_sprite.visible = true
 				return
