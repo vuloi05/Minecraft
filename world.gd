@@ -39,7 +39,7 @@ func _ready():
 	
 	player = get_parent().get_node("Player")
 
-func _process(_delta):
+func _process(delta):
 	if player:
 		var px = int(floor(player.global_position.x))
 		var pz = int(floor(player.global_position.z))
