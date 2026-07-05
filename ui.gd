@@ -8,11 +8,16 @@ var health_label: Label
 var hunger_label: Label
 var hotbar_slots = []
 
+var hud: Control
+var loading_panel: ColorRect
+var loading_label: Label
+
 func _ready():
 	# --- MÀN HÌNH CHÍNH (HUD) ---
-	var hud = Control.new()
+	hud = Control.new()
 	hud.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.visible = false # Ẩn đi khi đang load
 	$Control.add_child(hud)
 	
 	# Container chính ở giữa dưới màn hình
@@ -120,7 +125,28 @@ func _ready():
 	mine_progress.show_percentage = false
 	mine_progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mine_progress.visible = false
-	$Control.add_child(mine_progress)
+	hud.add_child(mine_progress) # Thêm vào hud thay vì $Control để dễ ẩn hiện chung
+	
+	# --- MÀN HÌNH LOADING ---
+	loading_panel = ColorRect.new()
+	loading_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	loading_panel.color = Color(0.12, 0.1, 0.08) # Nền xám nâu giống đất
+	loading_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	$Control.add_child(loading_panel)
+	
+	loading_label = Label.new()
+	loading_label.set_anchors_preset(Control.PRESET_CENTER)
+	loading_label.text = "Đang tạo thế giới...\n0%"
+	loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	loading_label.add_theme_font_size_override("font_size", 24)
+	loading_panel.add_child(loading_label)
+
+func update_loading(percent: int):
+	loading_label.text = "Đang tạo thế giới...\n" + str(percent) + "%"
+
+func finish_loading():
+	loading_panel.visible = false
+	hud.visible = true
 
 func toggle_crafting():
 	crafting_panel.visible = !crafting_panel.visible

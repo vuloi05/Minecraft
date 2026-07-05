@@ -24,6 +24,8 @@ var ui: CanvasLayer
 
 var mine_timer = 0.0
 var mining_pos = Vector3.ZERO
+
+var is_loading = true
 # ----------------
 
 @onready var camera = $Camera3D
@@ -76,6 +78,7 @@ func respawn():
 		ui.call_deferred("update_hunger", hunger)
 
 func _unhandled_input(event):
+	if is_loading: return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * 0.005)
 		camera.rotate_x(-event.relative.y * 0.005)
@@ -119,6 +122,8 @@ func _unhandled_input(event):
 			update_inv_ui()
 	
 	if event is InputEventKey and event.pressed:
+		if is_loading: return
+		
 		if event.keycode == KEY_ESCAPE:
 			if ui and ui.crafting_panel.visible:
 				ui.toggle_crafting()
@@ -143,6 +148,8 @@ func take_damage(amount: int):
 		respawn()
 
 func _physics_process(delta):
+	if is_loading: return
+	
 	# Xử lý đói
 	hunger_timer += delta
 	if hunger_timer >= HUNGER_INTERVAL:
@@ -164,6 +171,9 @@ func _physics_process(delta):
 			take_damage(damage)
 
 	was_on_floor = is_on_floor()
+
+func finish_loading():
+	is_loading = false
 	
 	# Xử lý đào khối (Giữ chuột trái)
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:

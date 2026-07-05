@@ -16,6 +16,10 @@ var chunk_queue = []
 var torches = {} # Vector3 -> OmniLight3D
 var zombie_timer = 0.0
 
+var is_initial_load = true
+var total_initial_chunks = (RENDER_DISTANCE * 2 + 1) * (RENDER_DISTANCE * 2 + 1)
+var loaded_initial_chunks = 0
+
 func _ready():
 	noise.seed = 1234
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -64,6 +68,18 @@ func _process(_delta):
 					add_child(chunk)
 					chunk.update_chunk_mesh()
 					update_neighbor_meshes(cpos)
+					
+					if is_initial_load:
+						loaded_initial_chunks += 1
+						var percent = int(float(loaded_initial_chunks) / total_initial_chunks * 100)
+						if player and player.ui and player.ui.has_method("update_loading"):
+							player.ui.update_loading(percent)
+						if loaded_initial_chunks >= total_initial_chunks:
+							is_initial_load = false
+							if player.has_method("finish_loading"):
+								player.finish_loading()
+							if player.ui and player.ui.has_method("finish_loading"):
+								player.ui.finish_loading()
 		
 		# --- Xử lý sinh Zombie vào ban đêm ---
 		var sun = get_parent().get_node_or_null("DirectionalLight3D")
