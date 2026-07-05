@@ -97,7 +97,14 @@ func update_hand(id: int):
 			if img != null:
 				var tex = ImageTexture.create_from_image(img)
 				hand_sprite.texture = tex
-				hand_sprite.pixel_size = 0.03
+				
+				# Tự động điều chỉnh kích thước hiển thị dù ảnh to hay nhỏ (chuẩn là 0.5 mét)
+				var max_dim = max(img.get_width(), img.get_height())
+				if max_dim > 0:
+					hand_sprite.pixel_size = 0.5 / float(max_dim)
+				else:
+					hand_sprite.pixel_size = 0.03
+					
 				# Xoay ảnh một chút cho giống tư thế vung cúp
 				hand_sprite.rotation_degrees = Vector3(0, 0, -45)
 				hand_sprite.visible = true
