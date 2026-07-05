@@ -4,13 +4,33 @@ const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-var block_scene = preload("res://Block.tscn")
+
+# --- SINH TỒN ---
+var hp = 20
+var hunger = 20
+var inventory_rocks = 0
+
+var hunger_timer = 0.0
+const HUNGER_INTERVAL = 10.0 # 10 giây trừ 1 đói
+
+var fall_start_y = 0.0
+var was_on_floor = true
+
+var ui: CanvasLayer
+# ----------------
 
 @onready var camera = $Camera3D
 @onready var raycast = $Camera3D/RayCast3D
+var world_node: Node3D
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	world_node = get_parent().get_node("World")
+	if has_node("../UI"):
+		ui = get_node("../UI")
+		ui.update_hp(hp)
+		ui.update_hunger(hunger)
+		ui.update_inventory(inventory_rocks)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -24,10 +44,8 @@ func _unhandled_input(event):
 			return
 			
 		if raycast.is_colliding():
-			var collider = raycast.get_collider()
 			var hit_point = raycast.get_collision_point()
 			var hit_normal = raycast.get_collision_normal()
-			var world_node = get_tree().root.get_node("Main/World")
 			
 			if event.button_index == MOUSE_BUTTON_LEFT:
 				# Xóa khối: lùi vào trong khối bị click
@@ -35,7 +53,15 @@ func _unhandled_input(event):
 				var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
 				world_node.set_block(grid_pos, 0)
 				
+				# Nhặt đá
+				inventory_rocks += 1
+				if ui: ui.update_inventory(inventory_rocks)
+				
 			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				if inventory_rocks <= 0:
+					print("Hết đá trong túi đồ!")
+					return
+				
 				# Đặt khối: tiến ra ngoài bề mặt click
 				var block_pos = hit_point + hit_normal * 0.5
 				var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
@@ -57,6 +83,8 @@ func _unhandled_input(event):
 					return
 					
 				world_node.set_block(grid_pos, 1)
+				inventory_rocks -= 1
+				if ui: ui.update_inventory(inventory_rocks)
 	
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -64,7 +92,43 @@ func _unhandled_input(event):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+func take_damage(amount: int):
+	hp -= amount
+	if hp < 0: hp = 0
+	if ui: ui.update_hp(hp)
+	print("Mất máu! HP còn: ", hp)
+	if hp == 0:
+		print("BẠN ĐÃ CHẾT! Hồi sinh...")
+		global_position = Vector3(8, 70, 8)
+		hp = 20
+		hunger = 20
+		if ui:
+			ui.update_hp(hp)
+			ui.update_hunger(hunger)
+
 func _physics_process(delta):
+	# Xử lý đói
+	hunger_timer += delta
+	if hunger_timer >= HUNGER_INTERVAL:
+		hunger_timer = 0.0
+		if hunger > 0:
+			hunger -= 1
+			if ui: ui.update_hunger(hunger)
+		else:
+			take_damage(1) # Đói quá mất máu
+
+	# Xử lý rơi (Fall damage)
+	if not is_on_floor() and was_on_floor:
+		fall_start_y = global_position.y
+	
+	if is_on_floor() and not was_on_floor:
+		var fall_dist = fall_start_y - global_position.y
+		if fall_dist > 4.0: # Rơi hơn 4 khối thì mất máu
+			var damage = int(fall_dist - 3.0)
+			take_damage(damage)
+
+	was_on_floor = is_on_floor()
+
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
