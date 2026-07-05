@@ -17,7 +17,6 @@ func _ready():
 	static_body.add_child(collision_shape)
 	static_body.add_to_group("blocks")
 	
-	# 2.1 Khai báo mảng 3D
 	blocks.resize(CHUNK_SIZE)
 	for x in range(CHUNK_SIZE):
 		blocks[x] = []
@@ -31,7 +30,6 @@ func _ready():
 	print("Kích thước mảng: ", blocks.size(), "x", blocks[0].size(), "x", blocks[0][0].size())
 	update_chunk_mesh()
 
-# 2.5 Cập nhật giá trị mảng và vẽ lại lưới
 func set_block(pos: Vector3, block_type: int):
 	var x = int(pos.x)
 	var y = int(pos.y)
@@ -41,7 +39,6 @@ func set_block(pos: Vector3, block_type: int):
 		blocks[x][y][z] = block_type
 		update_chunk_mesh()
 
-# 2.3 Chuyển sang SurfaceTool để gom lưới thành 1 draw call
 func update_chunk_mesh():
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_material(material)
@@ -62,6 +59,15 @@ func update_chunk_mesh():
 		mesh_instance.mesh = null
 		collision_shape.shape = null
 
+func add_quad(v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3):
+	st.set_normal(normal)
+	st.add_vertex(v0)
+	st.add_vertex(v1)
+	st.add_vertex(v2)
+	st.add_vertex(v0)
+	st.add_vertex(v2)
+	st.add_vertex(v3)
+
 func create_block_mesh(pos: Vector3):
 	var v0 = pos + Vector3(-0.5, -0.5, -0.5)
 	var v1 = pos + Vector3(0.5, -0.5, -0.5)
@@ -72,27 +78,15 @@ func create_block_mesh(pos: Vector3):
 	var v6 = pos + Vector3(0.5, 0.5, 0.5)
 	var v7 = pos + Vector3(-0.5, 0.5, 0.5)
 
-	# Front
-	st.set_normal(Vector3(0, 0, 1))
-	st.add_vertex(v4); st.add_vertex(v5); st.add_vertex(v6)
-	st.add_vertex(v4); st.add_vertex(v6); st.add_vertex(v7)
-	# Back
-	st.set_normal(Vector3(0, 0, -1))
-	st.add_vertex(v1); st.add_vertex(v0); st.add_vertex(v3)
-	st.add_vertex(v1); st.add_vertex(v3); st.add_vertex(v2)
-	# Right
-	st.set_normal(Vector3(1, 0, 0))
-	st.add_vertex(v5); st.add_vertex(v1); st.add_vertex(v2)
-	st.add_vertex(v5); st.add_vertex(v2); st.add_vertex(v6)
-	# Left
-	st.set_normal(Vector3(-1, 0, 0))
-	st.add_vertex(v0); st.add_vertex(v4); st.add_vertex(v7)
-	st.add_vertex(v0); st.add_vertex(v7); st.add_vertex(v3)
-	# Top
-	st.set_normal(Vector3(0, 1, 0))
-	st.add_vertex(v3); st.add_vertex(v7); st.add_vertex(v6)
-	st.add_vertex(v3); st.add_vertex(v6); st.add_vertex(v2)
-	# Bottom
-	st.set_normal(Vector3(0, -1, 0))
-	st.add_vertex(v0); st.add_vertex(v1); st.add_vertex(v5)
-	st.add_vertex(v0); st.add_vertex(v5); st.add_vertex(v4)
+	# Front (+Z)
+	add_quad(v4, v7, v6, v5, Vector3(0, 0, 1))
+	# Back (-Z)
+	add_quad(v1, v2, v3, v0, Vector3(0, 0, -1))
+	# Right (+X)
+	add_quad(v5, v6, v2, v1, Vector3(1, 0, 0))
+	# Left (-X)
+	add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0))
+	# Top (+Y)
+	add_quad(v7, v3, v2, v6, Vector3(0, 1, 0))
+	# Bottom (-Y)
+	add_quad(v0, v4, v5, v1, Vector3(0, -1, 0))
