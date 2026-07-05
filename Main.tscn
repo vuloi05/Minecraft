@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://cx1g0wkq3n00k"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://b8y123456789" path="res://Block.tscn" id="2_block"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_abc12"]
-sky_top_color = Color(0.385, 0.454, 0.55, 1)
 sky_horizon_color = Color(0.646, 0.656, 0.67, 1)
 ground_horizon_color = Color(0.646, 0.656, 0.67, 1)
 
@@ -49,3 +49,20 @@ shape = SubResource("CapsuleShape3D_player")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="RayCast3D" type="RayCast3D" parent="Player/Camera3D"]
+target_position = Vector3(0, 0, -5)
+
+[node name="Block" parent="." instance=ExtResource("2_block")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -4)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="CenterContainer"]
+custom_minimum_size = Vector2(4, 4)
+layout_mode = 2

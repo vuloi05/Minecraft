@@ -4,17 +4,41 @@ const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var block_scene = preload("res://Block.tscn")
 
 @onready var camera = $Camera3D
+@onready var raycast = $Camera3D/RayCast3D
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _unhandled_input(event):
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * 0.005)
 		camera.rotate_x(-event.relative.y * 0.005)
 		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+	
+	if event is InputEventMouseButton and event.pressed and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if raycast.is_colliding():
+				var collider = raycast.get_collider()
+				if collider.is_in_group("blocks"):
+					collider.queue_free()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			if raycast.is_colliding():
+				var collider = raycast.get_collider()
+				if collider.is_in_group("blocks") or collider.name == "Floor":
+					var hit_normal = raycast.get_collision_normal()
+					var new_pos = Vector3.ZERO
+					if collider.is_in_group("blocks"):
+						new_pos = collider.global_position + hit_normal
+					else:
+						var hit_point = raycast.get_collision_point()
+						new_pos = Vector3(round(hit_point.x), 0.5, round(hit_point.z))
+					
+					var new_block = block_scene.instantiate()
+					new_block.global_position = new_pos
+					get_tree().root.get_node("Main").add_child(new_block)
 	
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
