@@ -96,22 +96,35 @@ func update_hand(id: int):
 		elif id == 8: mat.albedo_color = Color(0.52, 0.37, 0.26) # Đất
 		hand_block.material_override = mat
 	elif id > 0: # Items
-		if id == 6 and FileAccess.file_exists("res://Stone_Pickaxe_JE2_BE2.png"):
-			var img = Image.load_from_file("res://Stone_Pickaxe_JE2_BE2.png")
+		var tex_path = ""
+		var is_tool = false
+		if id == 6:
+			tex_path = "res://Stone_Pickaxe_JE2_BE2.png"
+			is_tool = true
+		elif id == 5:
+			tex_path = "res://Torch_(texture)_JE3_BE2.webp"
+			is_tool = false
+			
+		if tex_path != "" and FileAccess.file_exists(tex_path):
+			var img = Image.load_from_file(tex_path)
 			if img != null:
 				var tex = ImageTexture.create_from_image(img)
 				hand_sprite.texture = tex
 				
-				# Tự động điều chỉnh kích thước hiển thị dù ảnh to hay nhỏ (chuẩn là 0.5 mét)
+				# Tự động điều chỉnh kích thước hiển thị
 				var max_dim = max(img.get_width(), img.get_height())
 				if max_dim > 0:
 					hand_sprite.pixel_size = 0.5 / float(max_dim)
 				else:
 					hand_sprite.pixel_size = 0.03
 					
-				# Xoay ảnh một chút cho giống tư thế vung cúp
-				hand_sprite.flip_h = true
-				hand_sprite.rotation_degrees = Vector3(0, 0, 0)
+				if is_tool:
+					hand_sprite.flip_h = true
+					hand_sprite.rotation_degrees = Vector3(0, 0, 0)
+				else:
+					hand_sprite.flip_h = false
+					hand_sprite.rotation_degrees = Vector3(0, 0, 0) # Đuốc đứng thẳng
+					
 				hand_sprite.visible = true
 				return
 				

@@ -176,6 +176,32 @@ func set_block(global_pos: Vector3, block_type: int):
 		var pos = Vector3(x, y, z)
 		if block_type == 5:
 			if not torches.has(pos):
+				var torch_node = Node3D.new()
+				torch_node.position = pos
+				
+				# Vẽ đuốc bằng Sprite3D (Crossed planes)
+				if FileAccess.file_exists("res://Torch.webp"):
+					var img = Image.load_from_file("res://Torch.webp")
+					if img != null:
+						var tex = ImageTexture.create_from_image(img)
+						var max_dim = max(img.get_width(), img.get_height())
+						var p_size = 0.6 / float(max_dim) if max_dim > 0 else 0.03
+						
+						var s1 = Sprite3D.new()
+						s1.texture = tex
+						s1.pixel_size = p_size
+						s1.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+						s1.position = Vector3(0, -0.2, 0)
+						torch_node.add_child(s1)
+						
+						var s2 = Sprite3D.new()
+						s2.texture = tex
+						s2.pixel_size = p_size
+						s2.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+						s2.position = Vector3(0, -0.2, 0)
+						s2.rotation_degrees = Vector3(0, 90, 0)
+						torch_node.add_child(s2)
+						
 				var light = OmniLight3D.new()
 				light.shadow_enabled = true # Bật đổ bóng để không xuyên tường
 				light.shadow_bias = 0.02 # Giảm shadow bias để không lọt sáng qua kẽ hở (Peter panning)
@@ -183,9 +209,11 @@ func set_block(global_pos: Vector3, block_type: int):
 				light.light_color = Color(1.0, 0.9, 0.6)
 				light.light_energy = 2.0
 				light.omni_range = 10.0
-				light.position = pos + Vector3(0, 0.3, 0) # Đẩy ánh sáng lên phần ngọn
-				add_child(light)
-				torches[pos] = light
+				light.position = Vector3(0, 0.3, 0) # Đẩy ánh sáng lên phần ngọn của Node
+				
+				torch_node.add_child(light)
+				add_child(torch_node)
+				torches[pos] = torch_node
 		elif block_type == 0:
 			if torches.has(pos):
 				torches[pos].queue_free()

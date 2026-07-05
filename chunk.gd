@@ -151,7 +151,10 @@ func add_quad(v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector
 	st.set_uv(Vector2(1, 1)); st.add_vertex(v2)
 	st.set_uv(Vector2(0, 1)); st.add_vertex(v3)
 
-func create_block_mesh(x: int, y: int, z: int, block_id: int):
+func create_block_mesh(x: int, y: int, z: int):
+	var block_id = blocks[x][y][z]
+	if block_id == 0 or block_id == 5: return # Không vẽ Air và Đuốc (Đuốc vẽ bằng Sprite3D)
+	
 	var pos = Vector3(x, y, z)
 	
 	var color_top = get_block_color(block_id)
@@ -167,15 +170,6 @@ func create_block_mesh(x: int, y: int, z: int, block_id: int):
 	var v_sy = 0.5
 	var v_sz = 0.5
 	var y_offset = 0.0
-	
-	if block_id == 5: # Đuốc
-		color_top = Color(1.0, 0.9, 0.2) # Lửa
-		color_bottom = Color(0.4, 0.25, 0.1) # Thân gỗ
-		color_side = Color(0.4, 0.25, 0.1)
-		v_sx = 0.05
-		v_sz = 0.05
-		v_sy = 0.3
-		y_offset = -0.2 # Gắn xuống mặt đất
 		
 	var v0 = pos + Vector3(-v_sx, -v_sy + y_offset, -v_sz)
 	var v1 = pos + Vector3(v_sx, -v_sy + y_offset, -v_sz)
@@ -186,9 +180,9 @@ func create_block_mesh(x: int, y: int, z: int, block_id: int):
 	var v6 = pos + Vector3(v_sx, v_sy + y_offset, v_sz)
 	var v7 = pos + Vector3(-v_sx, v_sy + y_offset, v_sz)
 
-	if block_id == 5 or is_transparent(get_block(x, y, z + 1)): add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
-	if block_id == 5 or is_transparent(get_block(x, y, z - 1)): add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
-	if block_id == 5 or is_transparent(get_block(x + 1, y, z)): add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
-	if block_id == 5 or is_transparent(get_block(x - 1, y, z)): add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
-	if block_id == 5 or is_transparent(get_block(x, y + 1, z)): add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
-	if block_id == 5 or is_transparent(get_block(x, y - 1, z)): add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
+	if is_transparent(get_block(x, y, z + 1)): add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
+	if is_transparent(get_block(x, y, z - 1)): add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
+	if is_transparent(get_block(x + 1, y, z)): add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
+	if is_transparent(get_block(x - 1, y, z)): add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
+	if is_transparent(get_block(x, y + 1, z)): add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
+	if is_transparent(get_block(x, y - 1, z)): add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
