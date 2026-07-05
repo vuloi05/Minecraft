@@ -83,10 +83,13 @@ func set_block(x: int, y: int, z: int, block_type: int):
 		blocks[x][y][z] = block_type
 		update_chunk_mesh()
 
+func is_transparent(id: int) -> bool:
+	return id == 0 or id == 4 or id == 5 # 0: Air, 4: Lá, 5: Đuốc
+
 func is_block_exposed(x: int, y: int, z: int) -> bool:
-	return get_block(x+1, y, z) == 0 or get_block(x-1, y, z) == 0 or \
-		   get_block(x, y+1, z) == 0 or get_block(x, y-1, z) == 0 or \
-		   get_block(x, y, z+1) == 0 or get_block(x, y, z-1) == 0
+	return is_transparent(get_block(x+1, y, z)) or is_transparent(get_block(x-1, y, z)) or \
+		   is_transparent(get_block(x, y+1, z)) or is_transparent(get_block(x, y-1, z)) or \
+		   is_transparent(get_block(x, y, z+1)) or is_transparent(get_block(x, y, z-1))
 
 func get_collision_shape() -> CollisionShape3D:
 	if active_collisions < collision_pool.size():
@@ -159,33 +162,33 @@ func create_block_mesh(x: int, y: int, z: int, block_id: int):
 		color_top = Color(0.3, 0.6, 0.2) # Mặt cỏ xanh
 		color_bottom = Color(0.52, 0.37, 0.26) # Mặt đất nâu
 		color_side = Color(0.52, 0.37, 0.26) # Cạnh bên nâu
-	
-	var size_x = 0.5
-	var size_y = 0.5
-	var size_z = 0.5
-	var offset_y = 0.0
+		
+	var v_sx = 0.5
+	var v_sy = 0.5
+	var v_sz = 0.5
+	var y_offset = 0.0
 	
 	if block_id == 5: # Đuốc
-		size_x = 0.06
-		size_y = 0.3
-		size_z = 0.06
-		offset_y = -0.2 # Kéo xuống chạm đáy ô
 		color_top = Color(1.0, 0.9, 0.2) # Lửa
-		color_side = Color(0.5, 0.3, 0.1) # Thân gỗ
-		color_bottom = Color(0.5, 0.3, 0.1)
+		color_bottom = Color(0.4, 0.25, 0.1) # Thân gỗ
+		color_side = Color(0.4, 0.25, 0.1)
+		v_sx = 0.05
+		v_sz = 0.05
+		v_sy = 0.3
+		y_offset = -0.2 # Gắn xuống mặt đất
 		
-	var v0 = pos + Vector3(-size_x, -size_y + offset_y, -size_z)
-	var v1 = pos + Vector3(size_x, -size_y + offset_y, -size_z)
-	var v2 = pos + Vector3(size_x, size_y + offset_y, -size_z)
-	var v3 = pos + Vector3(-size_x, size_y + offset_y, -size_z)
-	var v4 = pos + Vector3(-size_x, -size_y + offset_y, size_z)
-	var v5 = pos + Vector3(size_x, -size_y + offset_y, size_z)
-	var v6 = pos + Vector3(size_x, size_y + offset_y, size_z)
-	var v7 = pos + Vector3(-size_x, size_y + offset_y, size_z)
+	var v0 = pos + Vector3(-v_sx, -v_sy + y_offset, -v_sz)
+	var v1 = pos + Vector3(v_sx, -v_sy + y_offset, -v_sz)
+	var v2 = pos + Vector3(v_sx, v_sy + y_offset, -v_sz)
+	var v3 = pos + Vector3(-v_sx, v_sy + y_offset, -v_sz)
+	var v4 = pos + Vector3(-v_sx, -v_sy + y_offset, v_sz)
+	var v5 = pos + Vector3(v_sx, -v_sy + y_offset, v_sz)
+	var v6 = pos + Vector3(v_sx, v_sy + y_offset, v_sz)
+	var v7 = pos + Vector3(-v_sx, v_sy + y_offset, v_sz)
 
-	if get_block(x, y, z + 1) == 0: add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
-	if get_block(x, y, z - 1) == 0: add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
-	if get_block(x + 1, y, z) == 0: add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
-	if get_block(x - 1, y, z) == 0: add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
-	if get_block(x, y + 1, z) == 0: add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
-	if get_block(x, y - 1, z) == 0: add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
+	if block_id == 5 or is_transparent(get_block(x, y, z + 1)): add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
+	if block_id == 5 or is_transparent(get_block(x, y, z - 1)): add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
+	if block_id == 5 or is_transparent(get_block(x + 1, y, z)): add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
+	if block_id == 5 or is_transparent(get_block(x - 1, y, z)): add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
+	if block_id == 5 or is_transparent(get_block(x, y + 1, z)): add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
+	if block_id == 5 or is_transparent(get_block(x, y - 1, z)): add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)

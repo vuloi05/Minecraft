@@ -157,6 +157,8 @@ func _ready():
 	
 	loading_label = Label.new()
 	loading_label.set_anchors_preset(Control.PRESET_CENTER)
+	loading_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	loading_label.grow_vertical = Control.GROW_DIRECTION_BOTH
 	loading_label.text = "Đang tạo thế giới...\n0%"
 	loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	loading_label.add_theme_font_size_override("font_size", 24)

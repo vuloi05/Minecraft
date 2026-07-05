@@ -17,7 +17,7 @@ var torches = {} # Vector3 -> OmniLight3D
 var zombie_timer = 0.0
 
 var is_initial_load = true
-var total_initial_chunks = 9 # Chỉ cần chờ 9 chunk (3x3) thay vì 49 chunk để vào game nhanh hơn
+var total_initial_chunks = (RENDER_DISTANCE * 2 + 1) * (RENDER_DISTANCE * 2 + 1)
 var loaded_initial_chunks = 0
 
 func _ready():
