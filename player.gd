@@ -8,11 +8,6 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 # --- SINH TỒN ---
 var hp = 20
 var hunger = 20
-var inv_rocks = 0
-var inv_woods = 0
-var inv_planks = 0
-var has_pickaxe = false
-var selected_block = 1
 
 var hunger_timer = 0.0
 const HUNGER_INTERVAL = 10.0 # 10 giây trừ 1 đói
@@ -40,24 +35,13 @@ func _ready():
 	
 	if has_node("../UI"):
 		ui = get_node("../UI")
-		ui.craft_requested.connect(_on_craft_requested)
 		ui.call_deferred("update_hp", hp)
 		ui.call_deferred("update_hunger", hunger)
-		update_inv_ui()
-
-func update_inv_ui():
-	if ui: ui.call_deferred("update_inventory", inv_rocks, inv_woods, inv_planks, has_pickaxe, selected_block)
-
-func _on_craft_requested(item: String):
-	if item == "plank" and inv_woods >= 1:
-		inv_woods -= 1
-		inv_planks += 4
-		print("Chế tạo thành công 4 Ván gỗ!")
-	elif item == "pickaxe" and inv_planks >= 2 and not has_pickaxe:
-		inv_planks -= 2
-		has_pickaxe = true
-		print("Chế tạo thành công Cuốc chim!")
-	update_inv_ui()
+		
+		# Khởi tạo một số item mặc định (Tuỳ chọn)
+		ui.call_deferred("add_item", 6, 1) # Cuốc chim
+		ui.call_deferred("add_item", 5, 64) # Đuốc
+		ui.call_deferred("add_item", 2, 64) # Gỗ
 
 func respawn():
 	var spawn_x = 8.0
@@ -86,17 +70,31 @@ func _unhandled_input(event):
 	
 	if event is InputEventMouseButton and event.pressed:
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
-			if not (ui and ui.crafting_panel.visible):
+			if not (ui and ui.inventory_panel.visible):
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			return
+			
+		# Lăn chuột để chọn Hotbar
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if ui:
+				var new_idx = ui.selected_hotbar_index - 1
+				if new_idx < 0: new_idx = 8
+				ui.select_hotbar(new_idx)
+			return
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			if ui:
+				var new_idx = ui.selected_hotbar_index + 1
+				if new_idx > 8: new_idx = 0
+				ui.select_hotbar(new_idx)
 			return
 			
 		if raycast.is_colliding() and event.button_index == MOUSE_BUTTON_RIGHT:
 			var hit_point = raycast.get_collision_point()
 			var hit_normal = raycast.get_collision_normal()
 			
-			if selected_block == 1 and inv_rocks <= 0: return
-			if selected_block == 2 and inv_woods <= 0: return
-			if selected_block == 4 and inv_planks <= 0: return
+			var selected_block = 0
+			if ui: selected_block = ui.get_selected_item_id()
+			if selected_block == 0 or selected_block == 6: return # Cuốc hoặc ô trống không đặt được
 			
 			var block_pos = hit_point + hit_normal * 0.5
 			var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
@@ -116,27 +114,24 @@ func _unhandled_input(event):
 				return
 				
 			world_node.set_block(grid_pos, selected_block)
-			if selected_block == 1: inv_rocks -= 1
-			elif selected_block == 2: inv_woods -= 1
-			elif selected_block == 4: inv_planks -= 1
-			update_inv_ui()
+			if ui: ui.consume_selected_item()
 	
 	if event is InputEventKey and event.pressed:
 		if is_loading: return
 		
 		if event.keycode == KEY_ESCAPE:
-			if ui and ui.crafting_panel.visible:
-				ui.toggle_crafting()
+			if ui and ui.inventory_panel.visible:
+				ui.toggle_inventory()
 			elif Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 			else:
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		elif event.keycode == KEY_E or event.keycode == KEY_TAB:
-			if ui: ui.toggle_crafting()
-		elif event.keycode == KEY_1: selected_block = 1; update_inv_ui()
-		elif event.keycode == KEY_2: selected_block = 2; update_inv_ui()
-		elif event.keycode == KEY_3: selected_block = 4; update_inv_ui()
-		elif event.keycode == KEY_4: selected_block = 5; update_inv_ui()
+			if ui: ui.toggle_inventory()
+		
+		# Chọn Hotbar 1-9
+		if event.keycode >= KEY_1 and event.keycode <= KEY_9:
+			if ui: ui.select_hotbar(event.keycode - KEY_1)
 
 func take_damage(amount: int):
 	hp -= amount
@@ -189,19 +184,24 @@ func _physics_process(delta):
 			var block_id = world_node.get_block_global(grid_pos.x, grid_pos.y, grid_pos.z)
 			var req_time = 3.0 # Tay không đập đá 3s
 			if block_id == 2 or block_id == 3: req_time = 1.0 # Gỗ và lá 1s
-			if has_pickaxe and block_id == 1: req_time = 0.5 # Có cuốc đập đá 0.5s
+			
+			var selected_item = 0
+			if ui: selected_item = ui.get_selected_item_id()
+			if selected_item == 6 and block_id == 1: req_time = 0.5 # Có cuốc đập đá 0.5s
 			
 			if ui: ui.update_mining_ui(mine_timer, req_time)
 			
 			if mine_timer >= req_time:
 				world_node.set_block(grid_pos, 0)
-				if block_id == 1: inv_rocks += 1
-				elif block_id == 2: inv_woods += 1
-				elif block_id == 3: inv_woods += 1 # Lá rụng ra gỗ cho dễ
-				elif block_id == 4: inv_planks += 1
+				
+				# Rớt đồ
+				var drop_id = block_id
+				if block_id == 3: drop_id = 2 # Lá rớt ra Gỗ
+				
+				if ui and drop_id > 0:
+					ui.add_item(drop_id, 1)
 				
 				mine_timer = 0.0
-				update_inv_ui()
 				if ui: ui.update_mining_ui(0, 1)
 		else:
 			mine_timer = 0.0
