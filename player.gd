@@ -21,6 +21,14 @@ var mine_timer = 0.0
 var mining_pos = Vector3.ZERO
 
 var is_loading = true
+
+# --- TAY CẦM ---
+var hand_base: Node3D
+var hand_label: Label3D
+var hand_block: MeshInstance3D
+var current_hand_id = -1
+var bob_time = 0.0
+var hit_time = 0.0
 # ----------------
 
 @onready var camera = $Camera3D
@@ -38,10 +46,45 @@ func _ready():
 		ui.call_deferred("update_hp", hp)
 		ui.call_deferred("update_hunger", hunger)
 		
-		# Khởi tạo một số item mặc định (Tuỳ chọn)
 		ui.call_deferred("add_item", 6, 1) # Cuốc chim
 		ui.call_deferred("add_item", 5, 64) # Đuốc
 		ui.call_deferred("add_item", 2, 64) # Gỗ
+
+	# Khởi tạo Tay cầm (Hand)
+	hand_base = Node3D.new()
+	camera.add_child(hand_base)
+	
+	hand_label = Label3D.new()
+	hand_label.font_size = 150
+	hand_label.outline_size = 8
+	hand_label.position = Vector3(0.5, -0.4, -0.7)
+	hand_label.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+	hand_base.add_child(hand_label)
+	
+	hand_block = MeshInstance3D.new()
+	var box = BoxMesh.new()
+	box.size = Vector3(0.3, 0.3, 0.3)
+	hand_block.mesh = box
+	hand_block.position = Vector3(0.5, -0.4, -0.7)
+	hand_block.rotation_degrees = Vector3(15, -45, 0)
+	hand_base.add_child(hand_block)
+
+func update_hand(id: int):
+	hand_label.visible = false
+	hand_block.visible = false
+	
+	if id in [1, 2, 3, 4]: # Blocks
+		hand_block.visible = true
+		var mat = StandardMaterial3D.new()
+		if id == 1: mat.albedo_color = Color(0.5, 0.5, 0.5)
+		elif id == 2: mat.albedo_color = Color(0.4, 0.2, 0.0)
+		elif id == 3: mat.albedo_color = Color(0.6, 0.4, 0.2)
+		elif id == 4: mat.albedo_color = Color(0.2, 0.6, 0.2)
+		hand_block.material_override = mat
+	elif id > 0: # Items
+		hand_label.visible = true
+		if id == 5: hand_label.text = "🔦"
+		elif id == 6: hand_label.text = "⛏️"
 
 func respawn():
 	var spawn_x = 8.0
@@ -144,6 +187,32 @@ func take_damage(amount: int):
 
 func _physics_process(delta):
 	if is_loading: return
+	
+	# Cập nhật hiển thị tay cầm
+	var id = 0
+	if ui: id = ui.get_selected_item_id()
+	if id != current_hand_id:
+		current_hand_id = id
+		update_hand(id)
+		
+	# Animation tay cầm (Bobbing & Swinging)
+	var bob_offset = Vector3.ZERO
+	if is_on_floor() and Vector2(velocity.x, velocity.z).length() > 0.5:
+		bob_time += delta * 12.0
+		bob_offset.y = sin(bob_time) * 0.05
+		bob_offset.x = cos(bob_time) * 0.02
+	else:
+		bob_time = 0.0
+		
+	var swing_rot = Vector3.ZERO
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		hit_time += delta * 20.0
+		swing_rot.x = -abs(sin(hit_time)) * 60.0 # Vung tay xuống
+	else:
+		hit_time = 0.0
+		
+	hand_base.position = hand_base.position.lerp(bob_offset, delta * 15.0)
+	hand_base.rotation_degrees = hand_base.rotation_degrees.lerp(swing_rot, delta * 25.0)
 	
 	# Xử lý đói
 	hunger_timer += delta
