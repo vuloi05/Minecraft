@@ -9,6 +9,7 @@ extends CanvasLayer
 var crafting_panel: Panel
 var btn_plank: Button
 var btn_pickaxe: Button
+var mine_progress: ProgressBar
 
 signal craft_requested(item_name)
 
@@ -45,6 +46,20 @@ func _ready():
 	btn_pickaxe.text = "Chế tạo Cuốc chim (Cần 2 Ván)"
 	btn_pickaxe.pressed.connect(func(): emit_signal("craft_requested", "pickaxe"))
 	vbox.add_child(btn_pickaxe)
+	
+	# --- TẠO THANH TIẾN ĐỘ ĐÀO KHỐI ---
+	mine_progress = ProgressBar.new()
+	mine_progress.custom_minimum_size = Vector2(100, 10)
+	mine_progress.set_anchors_preset(Control.PRESET_CENTER)
+	# Căn giữa và đẩy xuống dưới tâm một chút
+	mine_progress.offset_left = -50
+	mine_progress.offset_right = 50
+	mine_progress.offset_top = 20
+	mine_progress.offset_bottom = 30
+	mine_progress.show_percentage = false
+	mine_progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mine_progress.visible = false
+	$Control.add_child(mine_progress)
 	# ----------------------------------------
 
 func update_hp(hp: int):
@@ -73,3 +88,11 @@ func update_inventory(rocks: int, woods: int, planks: int, has_pickaxe: bool, se
 	text += " (Đang cầm: %s)" % sel_text
 	
 	inventory_label.text = text
+
+func update_mining_ui(progress: float, total: float):
+	if progress > 0:
+		mine_progress.visible = true
+		mine_progress.max_value = total
+		mine_progress.value = progress
+	else:
+		mine_progress.visible = false

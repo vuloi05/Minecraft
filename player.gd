@@ -184,6 +184,8 @@ func _physics_process(delta):
 			if block_id == 2 or block_id == 3: req_time = 1.0 # Gỗ và lá 1s
 			if has_pickaxe and block_id == 1: req_time = 0.5 # Có cuốc đập đá 0.5s
 			
+			if ui: ui.update_mining_ui(mine_timer, req_time)
+			
 			if mine_timer >= req_time:
 				world_node.set_block(grid_pos, 0)
 				if block_id == 1: inv_rocks += 1
@@ -193,10 +195,13 @@ func _physics_process(delta):
 				
 				mine_timer = 0.0
 				update_inv_ui()
+				if ui: ui.update_mining_ui(0, 1)
 		else:
 			mine_timer = 0.0
+			if ui: ui.update_mining_ui(0, 1)
 	else:
 		mine_timer = 0.0
+		if ui: ui.update_mining_ui(0, 1)
 
 	if not is_on_floor():
 		velocity.y -= gravity * delta
