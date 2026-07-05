@@ -60,6 +60,7 @@ func _ready():
 	hand_label.outline_size = 8
 	hand_label.position = Vector3(0.5, -0.4, -0.7)
 	hand_label.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+	hand_label.no_depth_test = true
 	hand_base.add_child(hand_label)
 	
 	hand_block = MeshInstance3D.new()
@@ -74,6 +75,7 @@ func _ready():
 	hand_sprite.position = Vector3(0.5, -0.4, -0.7)
 	hand_sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
 	hand_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST # Render pixel art sắc nét
+	hand_sprite.no_depth_test = true
 	hand_base.add_child(hand_sprite)
 
 func update_hand(id: int):
@@ -84,6 +86,7 @@ func update_hand(id: int):
 	if id in [1, 2, 3, 4, 7, 8]: # Blocks
 		hand_block.visible = true
 		var mat = StandardMaterial3D.new()
+		mat.no_depth_test = true
 		if id == 1: mat.albedo_color = Color(0.3, 0.6, 0.2) # Cỏ
 		elif id == 2: mat.albedo_color = Color(0.4, 0.2, 0.0) # Gỗ
 		elif id == 3: mat.albedo_color = Color(0.6, 0.4, 0.2) # Ván
@@ -106,7 +109,8 @@ func update_hand(id: int):
 					hand_sprite.pixel_size = 0.03
 					
 				# Xoay ảnh một chút cho giống tư thế vung cúp
-				hand_sprite.rotation_degrees = Vector3(0, 0, -45)
+				hand_sprite.flip_h = true
+				hand_sprite.rotation_degrees = Vector3(0, 0, 0)
 				hand_sprite.visible = true
 				return
 				
