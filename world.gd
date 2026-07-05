@@ -177,6 +177,7 @@ func set_block(global_pos: Vector3, block_type: int):
 		if block_type == 5:
 			if not torches.has(pos):
 				var light = OmniLight3D.new()
+				light.shadow_enabled = true # Bật đổ bóng để không xuyên tường
 				light.light_color = Color(1.0, 0.9, 0.6)
 				light.light_energy = 2.0
 				light.omni_range = 10.0
