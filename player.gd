@@ -102,17 +102,16 @@ func update_hand(id: int):
 			tex_path = "res://Stone_Pickaxe_JE2_BE2.png"
 			is_tool = true
 		elif id == 5:
-			tex_path = "res://Torch_(texture)_JE3_BE2.webp"
+			tex_path = "res://Torch_%28texture%29_JE3_BE2.webp"
 			is_tool = false
 			
-		if tex_path != "" and FileAccess.file_exists(tex_path):
-			var img = Image.load_from_file(tex_path)
-			if img != null:
-				var tex = ImageTexture.create_from_image(img)
+		if tex_path != "" and (FileAccess.file_exists(tex_path) or FileAccess.file_exists(tex_path + ".import")):
+			var tex = load(tex_path) as Texture2D
+			if tex:
 				hand_sprite.texture = tex
 				
 				# Tự động điều chỉnh kích thước hiển thị
-				var max_dim = max(img.get_width(), img.get_height())
+				var max_dim = max(tex.get_width(), tex.get_height())
 				if max_dim > 0:
 					hand_sprite.pixel_size = 0.5 / float(max_dim)
 				else:

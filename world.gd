@@ -180,11 +180,10 @@ func set_block(global_pos: Vector3, block_type: int):
 				torch_node.position = pos
 				
 				# Vẽ đuốc bằng Sprite3D (Crossed planes)
-				if FileAccess.file_exists("res://Torch.webp"):
-					var img = Image.load_from_file("res://Torch.webp")
-					if img != null:
-						var tex = ImageTexture.create_from_image(img)
-						var max_dim = max(img.get_width(), img.get_height())
+				if FileAccess.file_exists("res://Torch.webp") or FileAccess.file_exists("res://Torch.webp.import"):
+					var tex = load("res://Torch.webp") as Texture2D
+					if tex:
+						var max_dim = max(tex.get_width(), tex.get_height())
 						var p_size = 0.6 / float(max_dim) if max_dim > 0 else 0.03
 						
 						var s1 = Sprite3D.new()
