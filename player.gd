@@ -18,7 +18,11 @@ func _unhandled_input(event):
 		camera.rotate_x(-event.relative.y * 0.005)
 		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
 	
-	if event is InputEventMouseButton and event.pressed and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseButton and event.pressed:
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			return
+			
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if raycast.is_colliding():
 				var collider = raycast.get_collider()
