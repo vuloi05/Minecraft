@@ -13,6 +13,9 @@ var player: CharacterBody3D
 # Hàng đợi để sinh Chunk dần dần, tránh giật lag
 var chunk_queue = []
 
+var torches = {} # Vector3 -> OmniLight3D
+var zombie_timer = 0.0
+
 func _ready():
 	noise.seed = 1234
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -61,6 +64,34 @@ func _process(_delta):
 					add_child(chunk)
 					chunk.update_chunk_mesh()
 					update_neighbor_meshes(cpos)
+		
+		# --- Xử lý sinh Zombie vào ban đêm ---
+		var sun = get_parent().get_node_or_null("DirectionalLight3D")
+		# Khi rotation.x của mặt trời nhỏ hơn 0 tức là nó đang chiếu từ dưới lên -> Ban đêm
+		if sun and sun.rotation.x < 0:
+			zombie_timer += delta
+			if zombie_timer >= 3.0:
+				zombie_timer = 0.0
+				var current_zombies = get_tree().get_nodes_in_group("mobs").size()
+				if current_zombies < 5: # Giới hạn tối đa 5 Zombie
+					spawn_zombie()
+		else:
+			# Nếu là ban ngày, tiêu diệt toàn bộ zombie (Zombie cháy nắng)
+			var zombies = get_tree().get_nodes_in_group("mobs")
+			for z in zombies:
+				z.queue_free()
+
+func spawn_zombie():
+	var z = Zombie.new()
+	var spawn_x = player.global_position.x + randf_range(-20, 20)
+	var spawn_z = player.global_position.z + randf_range(-20, 20)
+	
+	if abs(spawn_x - player.global_position.x) < 5 and abs(spawn_z - player.global_position.z) < 5:
+		return # Không spawn quá gần
+		
+	z.position = Vector3(spawn_x, 60, spawn_z) # Thả từ trên trời
+	z.player = player
+	add_child(z)
 
 func update_chunks(player_chunk: Vector2i):
 	# Thêm chunk mới vào hàng đợi thay vì sinh ngay lập tức
@@ -124,3 +155,19 @@ func set_block(global_pos: Vector3, block_type: int):
 		var lz = z - (cz * CHUNK_SIZE_Z)
 		chunks[cpos].set_block(lx, y, lz, block_type)
 		update_neighbor_meshes(cpos)
+		
+		# --- Xử lý Ánh sáng Đuốc ---
+		var pos = Vector3(x, y, z)
+		if block_type == 5:
+			if not torches.has(pos):
+				var light = OmniLight3D.new()
+				light.light_color = Color(1.0, 0.9, 0.6)
+				light.light_energy = 2.0
+				light.omni_range = 10.0
+				light.position = pos
+				add_child(light)
+				torches[pos] = light
+		elif block_type == 0:
+			if torches.has(pos):
+				torches[pos].queue_free()
+				torches.erase(pos)
