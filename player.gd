@@ -53,12 +53,13 @@ func _ready():
 
 	# Khởi tạo Tay cầm (Hand)
 	hand_base = Node3D.new()
+	hand_base.position = Vector3(0.5, -0.4, -0.7)
 	camera.add_child(hand_base)
 	
 	hand_label = Label3D.new()
 	hand_label.font_size = 150
 	hand_label.outline_size = 8
-	hand_label.position = Vector3(0.5, -0.4, -0.7)
+	hand_label.position = Vector3.ZERO
 	hand_label.billboard = BaseMaterial3D.BILLBOARD_DISABLED
 	hand_label.no_depth_test = true
 	hand_base.add_child(hand_label)
@@ -67,12 +68,12 @@ func _ready():
 	var box = BoxMesh.new()
 	box.size = Vector3(0.3, 0.3, 0.3)
 	hand_block.mesh = box
-	hand_block.position = Vector3(0.5, -0.4, -0.7)
+	hand_block.position = Vector3.ZERO
 	hand_block.rotation_degrees = Vector3(15, -45, 0)
 	hand_base.add_child(hand_block)
 	
 	hand_sprite = Sprite3D.new()
-	hand_sprite.position = Vector3(0.5, -0.4, -0.7)
+	hand_sprite.position = Vector3.ZERO
 	hand_sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
 	hand_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST # Render pixel art sắc nét
 	hand_sprite.no_depth_test = true
@@ -228,6 +229,7 @@ func _physics_process(delta):
 		update_hand(id)
 		
 	# Animation tay cầm (Bobbing & Swinging)
+	var base_pos = Vector3(0.5, -0.4, -0.7)
 	var bob_offset = Vector3.ZERO
 	if is_on_floor() and Vector2(velocity.x, velocity.z).length() > 0.5:
 		bob_time += delta * 12.0
@@ -243,7 +245,7 @@ func _physics_process(delta):
 	else:
 		hit_time = 0.0
 		
-	hand_base.position = hand_base.position.lerp(bob_offset, delta * 15.0)
+	hand_base.position = hand_base.position.lerp(base_pos + bob_offset, delta * 15.0)
 	hand_base.rotation_degrees = hand_base.rotation_degrees.lerp(swing_rot, delta * 25.0)
 	
 	# Xử lý đói
