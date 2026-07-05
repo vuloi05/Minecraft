@@ -241,7 +241,11 @@ func _physics_process(delta):
 	var swing_rot = Vector3.ZERO
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		hit_time += delta * 20.0
-		swing_rot.x = -abs(sin(hit_time)) * 60.0 # Vung tay xuống
+		var swing = abs(sin(hit_time))
+		swing_rot.z = swing * 45.0   # Vung chéo xuống như gạt nước (giữ nguyên mặt 2D)
+		swing_rot.x = -swing * 20.0  # Hơi gập xuống một chút
+		base_pos.y -= swing * 0.15   # Giật tay xuống dưới
+		base_pos.z -= swing * 0.15   # Đâm tay về phía trước
 	else:
 		hit_time = 0.0
 		
