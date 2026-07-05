@@ -73,13 +73,15 @@ func update_hand(id: int):
 	hand_label.visible = false
 	hand_block.visible = false
 	
-	if id in [1, 2, 3, 4]: # Blocks
+	if id in [1, 2, 3, 4, 7, 8]: # Blocks
 		hand_block.visible = true
 		var mat = StandardMaterial3D.new()
-		if id == 1: mat.albedo_color = Color(0.5, 0.5, 0.5)
-		elif id == 2: mat.albedo_color = Color(0.4, 0.2, 0.0)
-		elif id == 3: mat.albedo_color = Color(0.6, 0.4, 0.2)
-		elif id == 4: mat.albedo_color = Color(0.2, 0.6, 0.2)
+		if id == 1: mat.albedo_color = Color(0.3, 0.6, 0.2) # Cỏ
+		elif id == 2: mat.albedo_color = Color(0.4, 0.2, 0.0) # Gỗ
+		elif id == 3: mat.albedo_color = Color(0.6, 0.4, 0.2) # Ván
+		elif id == 4: mat.albedo_color = Color(0.2, 0.6, 0.2) # Lá
+		elif id == 7: mat.albedo_color = Color(0.5, 0.5, 0.5) # Đá
+		elif id == 8: mat.albedo_color = Color(0.52, 0.37, 0.26) # Đất
 		hand_block.material_override = mat
 	elif id > 0: # Items
 		hand_label.visible = true
@@ -252,11 +254,12 @@ func _physics_process(delta):
 				
 			var block_id = world_node.get_block_global(grid_pos.x, grid_pos.y, grid_pos.z)
 			var req_time = 3.0 # Tay không đập đá 3s
-			if block_id == 2 or block_id == 3: req_time = 1.0 # Gỗ và lá 1s
+			if block_id in [1, 8]: req_time = 1.0 # Cỏ, Đất 1s
+			if block_id in [2, 4]: req_time = 1.5 # Gỗ và lá 1.5s
 			
 			var selected_item = 0
 			if ui: selected_item = ui.get_selected_item_id()
-			if selected_item == 6 and block_id == 1: req_time = 0.5 # Có cuốc đập đá 0.5s
+			if selected_item == 6 and block_id == 7: req_time = 0.5 # Có cuốc đập đá 0.5s
 			
 			if ui: ui.update_mining_ui(mine_timer, req_time)
 			
@@ -265,7 +268,8 @@ func _physics_process(delta):
 				
 				# Rớt đồ
 				var drop_id = block_id
-				if block_id == 3: drop_id = 2 # Lá rớt ra Gỗ
+				if block_id == 1: drop_id = 8 # Cỏ rớt ra Đất
+				elif block_id == 4: drop_id = 2 # Lá rớt ra Gỗ
 				
 				if ui and drop_id > 0:
 					ui.add_item(drop_id, 1)

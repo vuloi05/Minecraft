@@ -49,7 +49,12 @@ func generate_blocks():
 			var terrain_height = int((noise.get_noise_2d(global_x, global_z) + 1.0) * 0.5 * 20) + 10
 			
 			for y in range(terrain_height + 1):
-				blocks[x][y][z] = 1 # Đá/Cỏ
+				if y == terrain_height:
+					blocks[x][y][z] = 1 # Cỏ (Grass Block)
+				elif y > terrain_height - 4:
+					blocks[x][y][z] = 8 # Đất (Dirt)
+				else:
+					blocks[x][y][z] = 7 # Đá (Stone)
 				
 			# Trồng cây (Tỷ lệ 1%, chỉ mọc nếu cách rìa để tránh lỗi mảng)
 			if randf() < 0.01 and terrain_height + 5 < CHUNK_SIZE_Y and x > 1 and x < CHUNK_SIZE_X - 2 and z > 1 and z < CHUNK_SIZE_Z - 2:
@@ -57,12 +62,12 @@ func generate_blocks():
 				blocks[x][terrain_height + 2][z] = 2
 				blocks[x][terrain_height + 3][z] = 2
 				
-				# Lá cây
-				blocks[x][terrain_height + 4][z] = 3
-				blocks[x-1][terrain_height + 3][z] = 3
-				blocks[x+1][terrain_height + 3][z] = 3
-				blocks[x][terrain_height + 3][z-1] = 3
-				blocks[x][terrain_height + 3][z+1] = 3
+				# Lá cây (ID 4)
+				blocks[x][terrain_height + 4][z] = 4
+				blocks[x-1][terrain_height + 3][z] = 4
+				blocks[x+1][terrain_height + 3][z] = 4
+				blocks[x][terrain_height + 3][z-1] = 4
+				blocks[x][terrain_height + 3][z+1] = 4
 
 func get_block(x: int, y: int, z: int) -> int:
 	if x >= 0 and x < CHUNK_SIZE_X and y >= 0 and y < CHUNK_SIZE_Y and z >= 0 and z < CHUNK_SIZE_Z:
@@ -124,11 +129,14 @@ func update_chunk_mesh():
 		mesh_instance.mesh = null
 
 func get_block_color(block_id: int) -> Color:
-	if block_id == 2: return Color(0.4, 0.25, 0.1) # Gỗ
-	elif block_id == 3: return Color(0.1, 0.5, 0.1) # Lá
-	elif block_id == 4: return Color(0.6, 0.4, 0.2) # Ván gỗ
+	if block_id == 1: return Color(0.3, 0.6, 0.2) # Cỏ (Base)
+	elif block_id == 2: return Color(0.4, 0.25, 0.1) # Gỗ
+	elif block_id == 3: return Color(0.6, 0.4, 0.2) # Ván gỗ
+	elif block_id == 4: return Color(0.1, 0.5, 0.1) # Lá
 	elif block_id == 5: return Color(1.0, 0.9, 0.2) # Đuốc
-	return Color(0.3, 0.6, 0.2) # Đá/Cỏ
+	elif block_id == 7: return Color(0.5, 0.5, 0.5) # Đá
+	elif block_id == 8: return Color(0.52, 0.37, 0.26) # Đất
+	return Color(1, 1, 1)
 
 func add_quad(v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, color: Color):
 	st.set_normal(normal)
@@ -142,7 +150,15 @@ func add_quad(v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector
 
 func create_block_mesh(x: int, y: int, z: int, block_id: int):
 	var pos = Vector3(x, y, z)
-	var color = get_block_color(block_id)
+	
+	var color_top = get_block_color(block_id)
+	var color_bottom = color_top
+	var color_side = color_top
+	
+	if block_id == 1: # Grass Block
+		color_top = Color(0.3, 0.6, 0.2) # Mặt cỏ xanh
+		color_bottom = Color(0.52, 0.37, 0.26) # Mặt đất nâu
+		color_side = Color(0.52, 0.37, 0.26) # Cạnh bên nâu
 	
 	# Nếu là Đuốc (ID=5), khối sẽ nhỏ hơn bình thường (scale 0.2)
 	var size = 0.5
@@ -158,9 +174,9 @@ func create_block_mesh(x: int, y: int, z: int, block_id: int):
 	var v6 = pos + Vector3(size, size, size)
 	var v7 = pos + Vector3(-size, size, size)
 
-	if get_block(x, y, z + 1) == 0: add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color)
-	if get_block(x, y, z - 1) == 0: add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color)
-	if get_block(x + 1, y, z) == 0: add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color)
-	if get_block(x - 1, y, z) == 0: add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color)
-	if get_block(x, y + 1, z) == 0: add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color)
-	if get_block(x, y - 1, z) == 0: add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color)
+	if get_block(x, y, z + 1) == 0: add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
+	if get_block(x, y, z - 1) == 0: add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
+	if get_block(x + 1, y, z) == 0: add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
+	if get_block(x - 1, y, z) == 0: add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
+	if get_block(x, y + 1, z) == 0: add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
+	if get_block(x, y - 1, z) == 0: add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)

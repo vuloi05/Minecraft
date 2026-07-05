@@ -56,12 +56,14 @@ func update_item(id: int, count: int):
 
 func get_icon(id: int) -> String:
 	match id:
-		1: return "🪨" # Đá
+		1: return "🟩" # Cỏ
 		2: return "🪵" # Gỗ
 		3: return "🟫" # Ván
 		4: return "🌿" # Lá
 		5: return "🔦" # Đuốc
 		6: return "⛏️" # Cuốc chim
+		7: return "🪨" # Đá
+		8: return "🟫" # Đất
 	return ""
 
 # --- DRAG AND DROP ---
