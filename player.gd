@@ -23,26 +23,23 @@ func _unhandled_input(event):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			return
 			
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if raycast.is_colliding():
-				var collider = raycast.get_collider()
-				if collider.is_in_group("blocks"):
-					collider.queue_free()
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			if raycast.is_colliding():
-				var collider = raycast.get_collider()
-				if collider.is_in_group("blocks") or collider.name == "Floor":
-					var hit_normal = raycast.get_collision_normal()
-					var new_pos = Vector3.ZERO
-					if collider.is_in_group("blocks"):
-						new_pos = collider.global_position + hit_normal
-					else:
-						var hit_point = raycast.get_collision_point()
-						new_pos = Vector3(round(hit_point.x), 0.5, round(hit_point.z))
-					
-					var new_block = block_scene.instantiate()
-					new_block.global_position = new_pos
-					get_tree().root.get_node("Main").add_child(new_block)
+		if raycast.is_colliding():
+			var collider = raycast.get_collider()
+			var hit_point = raycast.get_collision_point()
+			var hit_normal = raycast.get_collision_normal()
+			var world_node = get_tree().root.get_node("Main/World")
+			
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				# Xóa khối: lùi vào trong khối bị click
+				var block_pos = hit_point - hit_normal * 0.5
+				var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
+				world_node.set_block(grid_pos, 0)
+				
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				# Đặt khối: tiến ra ngoài bề mặt click
+				var block_pos = hit_point + hit_normal * 0.5
+				var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
+				world_node.set_block(grid_pos, 1)
 	
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
