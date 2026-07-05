@@ -39,6 +39,23 @@ func _unhandled_input(event):
 				# Đặt khối: tiến ra ngoài bề mặt click
 				var block_pos = hit_point + hit_normal * 0.5
 				var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
+				
+				# Kiểm tra va chạm: Không cho phép đặt khối đè lên vị trí của Player
+				var p_pos = global_position
+				var px_min = p_pos.x - 0.4; var px_max = p_pos.x + 0.4
+				var py_min = p_pos.y;       var py_max = p_pos.y + 1.8
+				var pz_min = p_pos.z - 0.4; var pz_max = p_pos.z + 0.4
+				
+				var bx_min = grid_pos.x - 0.5; var bx_max = grid_pos.x + 0.5
+				var by_min = grid_pos.y - 0.5; var by_max = grid_pos.y + 0.5
+				var bz_min = grid_pos.z - 0.5; var bz_max = grid_pos.z + 0.5
+				
+				if (px_min < bx_max and px_max > bx_min) and \
+				   (py_min < by_max and py_max > by_min) and \
+				   (pz_min < bz_max and pz_max > bz_min):
+					print("Không thể đặt khối: Vị trí bị kẹt bởi Player!")
+					return
+					
 				world_node.set_block(grid_pos, 1)
 	
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
