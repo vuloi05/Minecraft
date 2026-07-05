@@ -26,6 +26,7 @@ var is_loading = true
 var hand_base: Node3D
 var hand_label: Label3D
 var hand_block: MeshInstance3D
+var hand_sprite: Sprite3D
 var current_hand_id = -1
 var bob_time = 0.0
 var hit_time = 0.0
@@ -68,10 +69,17 @@ func _ready():
 	hand_block.position = Vector3(0.5, -0.4, -0.7)
 	hand_block.rotation_degrees = Vector3(15, -45, 0)
 	hand_base.add_child(hand_block)
+	
+	hand_sprite = Sprite3D.new()
+	hand_sprite.position = Vector3(0.5, -0.4, -0.7)
+	hand_sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+	hand_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST # Render pixel art sắc nét
+	hand_base.add_child(hand_sprite)
 
 func update_hand(id: int):
 	hand_label.visible = false
 	hand_block.visible = false
+	hand_sprite.visible = false
 	
 	if id in [1, 2, 3, 4, 7, 8]: # Blocks
 		hand_block.visible = true
@@ -84,6 +92,17 @@ func update_hand(id: int):
 		elif id == 8: mat.albedo_color = Color(0.52, 0.37, 0.26) # Đất
 		hand_block.material_override = mat
 	elif id > 0: # Items
+		if id == 6 and FileAccess.file_exists("res://pickaxe.png"):
+			var img = Image.load_from_file("res://pickaxe.png")
+			if img != null:
+				var tex = ImageTexture.create_from_image(img)
+				hand_sprite.texture = tex
+				hand_sprite.pixel_size = 0.03
+				# Xoay ảnh một chút cho giống tư thế vung cúp
+				hand_sprite.rotation_degrees = Vector3(0, 0, -45)
+				hand_sprite.visible = true
+				return
+				
 		hand_label.visible = true
 		if id == 5: hand_label.text = "🔦"
 		elif id == 6: hand_label.text = "⛏️"
