@@ -92,8 +92,8 @@ func update_hand(id: int):
 		elif id == 8: mat.albedo_color = Color(0.52, 0.37, 0.26) # Đất
 		hand_block.material_override = mat
 	elif id > 0: # Items
-		if id == 6 and FileAccess.file_exists("res://pickaxe.png"):
-			var img = Image.load_from_file("res://pickaxe.png")
+		if id == 6 and FileAccess.file_exists("res://Stone_Pickaxe_JE2_BE2.png"):
+			var img = Image.load_from_file("res://Stone_Pickaxe_JE2_BE2.png")
 			if img != null:
 				var tex = ImageTexture.create_from_image(img)
 				hand_sprite.texture = tex
