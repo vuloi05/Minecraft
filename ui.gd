@@ -121,7 +121,6 @@ func _ready():
 	# Phần dưới: Túi đồ chính
 	var main_grid = GridContainer.new()
 	main_grid.columns = 9
-	main_grid.alignment = BoxContainer.ALIGNMENT_CENTER
 	inv_vbox.add_child(main_grid)
 	
 	# Index 9-35
