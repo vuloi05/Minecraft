@@ -26,11 +26,32 @@ var world_node: Node3D
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	world_node = get_parent().get_node("World")
+	
+	respawn() # Khởi tạo vị trí và máu
+	
 	if has_node("../UI"):
 		ui = get_node("../UI")
 		ui.call_deferred("update_hp", hp)
 		ui.call_deferred("update_hunger", hunger)
 		ui.call_deferred("update_inventory", inventory_rocks)
+
+func respawn():
+	var spawn_x = 8.0
+	var spawn_z = 8.0
+	var terrain_y = 30.0
+	
+	if world_node and world_node.noise:
+		terrain_y = float(int((world_node.noise.get_noise_2d(spawn_x, spawn_z) + 1.0) * 0.5 * 20) + 10)
+		
+	global_position = Vector3(spawn_x, terrain_y + 2.0, spawn_z)
+	hp = 20
+	hunger = 20
+	fall_start_y = global_position.y
+	was_on_floor = false
+	
+	if ui:
+		ui.call_deferred("update_hp", hp)
+		ui.call_deferred("update_hunger", hunger)
 
 func _unhandled_input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -99,12 +120,7 @@ func take_damage(amount: int):
 	print("Mất máu! HP còn: ", hp)
 	if hp == 0:
 		print("BẠN ĐÃ CHẾT! Hồi sinh...")
-		global_position = Vector3(8, 70, 8)
-		hp = 20
-		hunger = 20
-		if ui:
-			ui.update_hp(hp)
-			ui.update_hunger(hunger)
+		respawn()
 
 func _physics_process(delta):
 	# Xử lý đói
