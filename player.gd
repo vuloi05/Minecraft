@@ -1,9 +1,10 @@
 extends CharacterBody3D
 
-const SPEED = 5.0
-const JUMP_VELOCITY = 4.5
+const SPEED = 4.3
+const JUMP_VELOCITY = 8.5
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+# Thay vì dùng trọng lực mặc định (9.8), tăng mạnh trọng lực lên để nhân vật rớt xuống nhanh, cảm giác nặng nề chân thực hơn giống Minecraft
+var gravity = 25.0
 
 # --- SINH TỒN ---
 var hp = 20
