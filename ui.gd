@@ -189,9 +189,9 @@ func _ready():
 		temp_inv_slots[i] = slot
 		inv_hotbar.add_child(slot)
 		
-	for i in range(9, 36): temp_inv_slots[i] = inv_slots[i-9]
-	for i in range(36, 40): temp_inv_slots[i] = inv_slots[i-9]
-	temp_inv_slots[40] = inv_slots[31]
+	for i in range(9, 36): temp_inv_slots[i] = inv_slots[i - 4]
+	for i in range(36, 40): temp_inv_slots[i] = inv_slots[i - 36]
+	temp_inv_slots[40] = inv_slots[4]
 	
 	inv_slots = temp_inv_slots
 	
