@@ -94,8 +94,7 @@ func _ready():
 	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	inventory_overlay.add_child(center_container)
 	
-	inventory_panel = Panel.new()
-	inventory_panel.custom_minimum_size = Vector2(500, 480)
+	inventory_panel = PanelContainer.new()
 	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color("#C6C6C6")
@@ -107,21 +106,38 @@ func _ready():
 	inventory_panel.add_theme_stylebox_override("panel", style)
 	center_container.add_child(inventory_panel)
 	
+	var margin_c = MarginContainer.new()
+	margin_c.add_theme_constant_override("margin_left", 20)
+	margin_c.add_theme_constant_override("margin_right", 20)
+	margin_c.add_theme_constant_override("margin_top", 20)
+	margin_c.add_theme_constant_override("margin_bottom", 20)
+	inventory_panel.add_child(margin_c)
+	
 	var inv_vbox = VBoxContainer.new()
-	inv_vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	inv_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	inv_vbox.add_theme_constant_override("separation", 20)
-	inventory_panel.add_child(inv_vbox)
+	inv_vbox.add_theme_constant_override("separation", 16)
+	margin_c.add_child(inv_vbox)
 	
 	# Phần trên: Chế tạo
 	var top_hbox = HBoxContainer.new()
-	top_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	top_hbox.add_theme_constant_override("separation", 30)
+	top_hbox.alignment = BoxContainer.ALIGNMENT_END # Ép sát qua phải
+	top_hbox.add_theme_constant_override("separation", 24)
 	inv_vbox.add_child(top_hbox)
+	
+	var craft_vbox = VBoxContainer.new()
+	craft_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	top_hbox.add_child(craft_vbox)
+	
+	var craft_label = Label.new()
+	craft_label.text = "Crafting"
+	craft_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
+	craft_vbox.add_child(craft_label)
 	
 	var craft_grid = GridContainer.new()
 	craft_grid.columns = 2
-	top_hbox.add_child(craft_grid)
+	craft_grid.add_theme_constant_override("h_separation", 2)
+	craft_grid.add_theme_constant_override("v_separation", 2)
+	craft_vbox.add_child(craft_grid)
 	
 	# Index 36-39
 	for i in range(36, 40):
@@ -132,6 +148,7 @@ func _ready():
 	var arrow = Label.new()
 	arrow.text = "➡"
 	arrow.add_theme_font_size_override("font_size", 30)
+	arrow.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
 	top_hbox.add_child(arrow)
 	
 	var res_slot = InventorySlot.new(40, "result", self)
@@ -141,6 +158,8 @@ func _ready():
 	# Phần dưới: Túi đồ chính
 	var main_grid = GridContainer.new()
 	main_grid.columns = 9
+	main_grid.add_theme_constant_override("h_separation", 4)
+	main_grid.add_theme_constant_override("v_separation", 4)
 	inv_vbox.add_child(main_grid)
 	
 	# Index 9-35
@@ -149,9 +168,16 @@ func _ready():
 		inv_slots.append(slot)
 		main_grid.add_child(slot)
 		
+	# Khoảng hở nhỏ giữa túi chính và túi nhanh (Hotbar)
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(0, 10)
+	inv_vbox.add_child(spacer)
+	
 	# Index 0-8 (Hotbar trong túi)
-	var inv_hotbar = HBoxContainer.new()
-	inv_hotbar.alignment = BoxContainer.ALIGNMENT_CENTER
+	var inv_hotbar = GridContainer.new()
+	inv_hotbar.columns = 9
+	inv_hotbar.add_theme_constant_override("h_separation", 4)
+	inv_hotbar.add_theme_constant_override("v_separation", 4)
 	inv_vbox.add_child(inv_hotbar)
 	
 	# Phải sort array inv_slots cho đúng index để dễ truy cập

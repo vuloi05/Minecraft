@@ -23,6 +23,7 @@ func _init(idx: int, type: String, ui: Node):
 	br.set_anchors_preset(Control.PRESET_FULL_RECT)
 	br.offset_left = 2
 	br.offset_top = 2
+	br.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(br)
 	
 	var center = ColorRect.new()
@@ -32,6 +33,7 @@ func _init(idx: int, type: String, ui: Node):
 	center.offset_top = 2
 	center.offset_right = -2
 	center.offset_bottom = -2
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	
 	border = ReferenceRect.new()
@@ -39,6 +41,7 @@ func _init(idx: int, type: String, ui: Node):
 	border.border_color = Color(0.1, 0.1, 0.1, 0.0) # Ẩn viền đen mặc định
 	border.border_width = 3.0
 	border.editor_only = false
+	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(border)
 	
 	label = Label.new()
@@ -46,6 +49,7 @@ func _init(idx: int, type: String, ui: Node):
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 28)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(label)
 	
 	count_label = Label.new()
@@ -56,6 +60,7 @@ func _init(idx: int, type: String, ui: Node):
 	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	count_label.add_theme_font_size_override("font_size", 16)
 	count_label.add_theme_constant_override("outline_size", 4)
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(count_label)
 
 func update_item(id: int, count: int):
