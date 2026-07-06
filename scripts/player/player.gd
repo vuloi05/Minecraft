@@ -110,48 +110,109 @@ func update_hand(id: int):
 	hand_block.visible = false
 	hand_sprite.visible = false
 	
-	if id in [1, 2, 3, 4, 7, 8]: # Blocks
+	var b_data = DataManager.get_block_data(id)
+	var is_block = false
+	if b_data and not b_data.get("is_item", false):
+		is_block = true
+		
+	if is_block: # Blocks
 		hand_block.visible = true
+		
+		var st = SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		
+		var uv_top = DataManager.get_block_uv(id)
+		var uv_bottom = uv_top
+		var uv_side = uv_top
+		
+		var c_top = Color(1, 1, 1)
+		var c_side = Color(0.8, 0.8, 0.8) # Đánh bóng giả tạo chiều sâu
+		var c_bottom = Color(0.6, 0.6, 0.6)
+		
+		if id == 1: # Grass Block
+			c_top *= Color(0.4, 0.7, 0.3)
+			if DataManager.uv_map.has("grass_block_top"): uv_top = DataManager.uv_map["grass_block_top"]
+			elif DataManager.uv_map.has("grass_block_side"): uv_top = DataManager.uv_map["grass_block_side"]
+			if DataManager.uv_map.has("dirt"): uv_bottom = DataManager.uv_map["dirt"]
+			if DataManager.uv_map.has("grass_block_side"): uv_side = DataManager.uv_map["grass_block_side"]
+		elif id == 4: # Leaves
+			var tint = Color(0.2, 0.55, 0.1)
+			c_top *= tint; c_side *= tint; c_bottom *= tint
+			
+		var hs = 0.15 # half size
+		
+		# Define vertices
+		var v0 = Vector3(-hs, -hs, hs)
+		var v1 = Vector3(hs, -hs, hs)
+		var v2 = Vector3(hs, -hs, -hs)
+		var v3 = Vector3(-hs, -hs, -hs)
+		var v4 = Vector3(-hs, hs, hs)
+		var v5 = Vector3(hs, hs, hs)
+		var v6 = Vector3(hs, hs, -hs)
+		var v7 = Vector3(-hs, hs, -hs)
+		
+		# Top
+		_add_quad(st, v4, v7, v6, v5, Vector3(0, 1, 0), uv_top, c_top)
+		# Bottom
+		_add_quad(st, v0, v1, v2, v3, Vector3(0, -1, 0), uv_bottom, c_bottom)
+		# Front
+		_add_quad(st, v0, v4, v5, v1, Vector3(0, 0, 1), uv_side, c_side)
+		# Back
+		_add_quad(st, v2, v6, v7, v3, Vector3(0, 0, -1), uv_side, c_side)
+		# Left
+		_add_quad(st, v3, v7, v4, v0, Vector3(-1, 0, 0), uv_side, c_side)
+		# Right
+		_add_quad(st, v1, v5, v6, v2, Vector3(1, 0, 0), uv_side, c_side)
+		
+		st.generate_normals()
+		var mesh = st.commit()
+		
 		var mat = StandardMaterial3D.new()
+		var atlas = load("res://assets/textures/atlas.png")
+		if atlas:
+			mat.albedo_texture = atlas
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 		mat.no_depth_test = true
-		if id == 1: mat.albedo_color = Color(0.3, 0.6, 0.2) # Cỏ
-		elif id == 2: mat.albedo_color = Color(0.4, 0.2, 0.0) # Gỗ
-		elif id == 3: mat.albedo_color = Color(0.6, 0.4, 0.2) # Ván
-		elif id == 4: mat.albedo_color = Color(0.2, 0.6, 0.2) # Lá
-		elif id == 7: mat.albedo_color = Color(0.5, 0.5, 0.5) # Đá
-		elif id == 8: mat.albedo_color = Color(0.52, 0.37, 0.26) # Đất
+		
+		hand_block.mesh = mesh
 		hand_block.material_override = mat
 	elif id > 0: # Items
 		var tex_path = ""
 		var is_tool = false
-		if id == 6:
-			tex_path = "res://assets/textures/items/Stone_Pickaxe_JE2_BE2.png"
+		if id in [6, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]:
 			is_tool = true
-		elif id == 5:
-			tex_path = "res://assets/textures/items/Torch_(texture)_JE3_BE2.webp"
-			is_tool = false
 			
-		if tex_path != "" and (FileAccess.file_exists(tex_path) or FileAccess.file_exists(tex_path + ".import")):
-			var tex = load(tex_path) as Texture2D
-			if tex:
-				hand_sprite.texture = tex
+		b_data = DataManager.get_block_data(id)
+		var tex = null
+		
+		if b_data and b_data.has("texture"):
+			var tex_block = "res://assets/textures/blocks/" + b_data["texture"]
+			var tex_item = "res://assets/textures/items/" + b_data["texture"]
+			
+			if FileAccess.file_exists(tex_block) or FileAccess.file_exists(tex_block + ".import"):
+				tex = load(tex_block) as Texture2D
+			elif FileAccess.file_exists(tex_item) or FileAccess.file_exists(tex_item + ".import"):
+				tex = load(tex_item) as Texture2D
 				
-				# Tự động điều chỉnh kích thước hiển thị
-				var max_dim = max(tex.get_width(), tex.get_height())
-				if max_dim > 0:
-					hand_sprite.pixel_size = 0.5 / float(max_dim)
-				else:
-					hand_sprite.pixel_size = 0.03
-					
-				if is_tool:
-					hand_sprite.flip_h = true
-					hand_sprite.rotation_degrees = Vector3(0, 0, 0)
-				else:
-					hand_sprite.flip_h = false
-					hand_sprite.rotation_degrees = Vector3(0, 0, -20) # Đuốc nghiêng giống cúp
-					
-				hand_sprite.visible = true
-				return
+		if tex:
+			hand_sprite.texture = tex
+			
+			# Tự động điều chỉnh kích thước hiển thị
+			var max_dim = max(tex.get_width(), tex.get_height())
+			if max_dim > 0:
+				hand_sprite.pixel_size = 0.5 / float(max_dim)
+			else:
+				hand_sprite.pixel_size = 0.03
+				
+			if is_tool:
+				hand_sprite.flip_h = true
+				hand_sprite.rotation_degrees = Vector3(0, 0, 0)
+			else:
+				hand_sprite.flip_h = false
+				hand_sprite.rotation_degrees = Vector3(0, 0, -20) # Đuốc nghiêng giống cúp
+				
+			hand_sprite.visible = true
+			return
 				
 		hand_label.visible = true
 		if id == 5: hand_label.text = "🔦"
@@ -165,10 +226,12 @@ func respawn():
 	if world_node and world_node.noise:
 		terrain_y = float(int((world_node.noise.get_noise_2d(spawn_x, spawn_z) + 1.0) * 0.5 * 20) + 10)
 		
-	global_position = Vector3(spawn_x, terrain_y + 2.0, spawn_z)
+	# Spawn người chơi cao hơn địa hình 15 block để tránh bị kẹt trong cây/lá
+	global_position = Vector3(spawn_x, terrain_y + 15.0, spawn_z)
 	hp = 20
 	hunger = 20
-	fall_start_y = global_position.y
+	# Đặt fall_start_y thấp xuống để không bị mất máu khi rơi từ điểm spawn
+	fall_start_y = terrain_y
 	was_on_floor = false
 	
 	if ui:
@@ -389,14 +452,13 @@ func _physics_process(delta):
 				if mine_timer >= req_time:
 					world_node.set_block(grid_pos, 0)
 					
-					# Rớt đồ qua DataManager
-					if ui:
-						var drops = DataManager.get_drops(block_id, selected_item)
-						for d in drops:
-							ui.add_item(d.id, d.count)
-				
-				mine_timer = 0.0
-				if ui: ui.update_mining_ui(0, 1)
+					# Rớt đồ xuống đất thay vì hút thẳng vào túi
+					var drops = DataManager.get_drops(block_id, selected_item)
+					for d in drops:
+						world_node.spawn_item(d.id, d.count, grid_pos)
+					
+					mine_timer = 0.0
+					if ui: ui.update_mining_ui(0, 1)
 		else:
 			mine_timer = 0.0
 			if ui: ui.update_mining_ui(0, 1)
@@ -435,3 +497,16 @@ func _physics_process(delta):
 
 func finish_loading():
 	is_loading = false
+
+func _add_quad(st: SurfaceTool, v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, uv_rect: Dictionary, color: Color = Color(1, 1, 1)):
+	st.set_normal(normal)
+	st.set_color(color)
+	st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_max)); st.add_vertex(v0)
+	st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_min)); st.add_vertex(v1)
+	st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_min)); st.add_vertex(v2)
+	
+	st.set_normal(normal)
+	st.set_color(color)
+	st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_max)); st.add_vertex(v0)
+	st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_min)); st.add_vertex(v2)
+	st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_max)); st.add_vertex(v3)

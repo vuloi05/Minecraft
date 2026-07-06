@@ -437,6 +437,59 @@
             ],
             "hunger_restore": 5,
             "note": "3 lúa mì xếp ngang -> 1 bánh mì. Phục hồi độ đói."
+        },
+        {
+            "id": "iron_axe",
+            "output": {
+                "item": "iron_axe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "iron_ingot",
+                    "iron_ingot"
+                ],
+                [
+                    "iron_ingot",
+                    "stick"
+                ],
+                [
+                    null,
+                    "stick"
+                ]
+            ],
+            "tool_tier": 3,
+            "note": "Rìu sắt."
+        },
+        {
+            "id": "iron_shovel",
+            "output": {
+                "item": "iron_shovel",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "iron_ingot",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "tool_tier": 3,
+            "note": "Xẻng sắt."
         }
     ],
     "tool_tier_reference": {

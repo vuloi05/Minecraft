@@ -8,11 +8,12 @@ const RENDER_DISTANCE = 3
 var chunks = {} # Dictionary mapping Vector2i -> Chunk
 var chunks_mutex = Mutex.new() # Mutex để đồng bộ đa luồng khi đọc/ghi vào dictionary chunks
 
-const MAX_THREADS = 4
+const MAX_THREADS = 8
 var active_threads = 0
 
 var material = StandardMaterial3D.new()
 var noise = FastNoiseLite.new()
+var cave_noise = FastNoiseLite.new()
 var player: CharacterBody3D
 
 # Hàng đợi để sinh Chunk dần dần
@@ -37,10 +38,22 @@ func _ready():
 	tex.width = 64
 	tex.height = 64
 	
-	material.albedo_color = Color(1, 1, 1) # Cho phép màu đỉnh hiển thị
-	material.albedo_texture = tex
+	cave_noise = FastNoiseLite.new()
+	cave_noise.seed = 4321
+	cave_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	cave_noise.frequency = 0.05
+	
+	var atlas_tex = load("res://assets/textures/atlas.png")
+	if atlas_tex:
+		material.albedo_texture = atlas_tex
+	else:
+		material.albedo_texture = tex
+		
+	material.albedo_color = Color(1, 1, 1)
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	material.vertex_color_use_as_albedo = true # Bật Vertex Colors
+	material.vertex_color_use_as_albedo = true # Bật Color để tint màu lá và cỏ
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	material.alpha_scissor_threshold = 0.5
 	
 	player = get_parent().get_node("Player")
 
@@ -72,7 +85,7 @@ func _process(delta):
 				chunks_mutex.unlock()
 				
 				if not has_chunk:
-					var chunk = Chunk.new(cpos, noise, material, self)
+					var chunk = Chunk.new(cpos, noise, material, self, cave_noise)
 					
 					chunks_mutex.lock()
 					chunks[cpos] = chunk
@@ -231,35 +244,8 @@ func set_block(global_pos: Vector3, block_type: int):
 				var torch_node = Node3D.new()
 				torch_node.position = pos
 				
-				# Vẽ đuốc bằng Sprite3D (Crossed planes)
-				var tex = load("res://assets/textures/blocks/Torch.webp") as Texture2D
-				if tex != null:
-					var p_size = 0.04
-					
-					var s1 = Sprite3D.new()
-					s1.texture = tex
-					s1.pixel_size = p_size
-					s1.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-					s1.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD # Tránh lỗi chèn hình trong Godot
-					s1.position = Vector3(0, -0.2, 0)
-					torch_node.add_child(s1)
-					
-					var s2 = Sprite3D.new()
-					s2.texture = tex
-					s2.pixel_size = p_size
-					s2.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-					s2.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-					s2.position = Vector3(0, -0.2, 0)
-					s2.rotation_degrees = Vector3(0, 90, 0)
-					torch_node.add_child(s2)
-				else:
-					var mesh = MeshInstance3D.new()
-					var box = BoxMesh.new()
-					box.size = Vector3(0.1, 0.5, 0.1)
-					mesh.mesh = box
-					mesh.position = Vector3(0, -0.25, 0)
-					torch_node.add_child(mesh)
-						
+				# Lưới của Đuốc giờ đây được vẽ bởi chunk.gd
+				# Ở đây chỉ sinh ra ánh sáng (OmniLight3D)
 				var light = OmniLight3D.new()
 				light.shadow_enabled = true # Bật đổ bóng để không xuyên tường
 				light.shadow_bias = 0.02 # Giảm shadow bias để không lọt sáng qua kẽ hở (Peter panning)
@@ -276,3 +262,15 @@ func set_block(global_pos: Vector3, block_type: int):
 			if torches.has(pos):
 				torches[pos].queue_free()
 				torches.erase(pos)
+
+func spawn_item(id: int, count: int, pos: Vector3):
+	var item_scene = load("res://scenes/ItemEntity.tscn")
+	if item_scene:
+		var item = item_scene.instantiate()
+		item.item_id = id
+		item.count = count
+		item.position = pos + Vector3(0.5, 0.5, 0.5) # Center of the block
+		
+		# Thêm lực bật ngẫu nhiên nhẹ lên trên
+		item.linear_velocity = Vector3(randf_range(-1.0, 1.0), randf_range(2.0, 4.0), randf_range(-1.0, 1.0))
+		add_child(item)

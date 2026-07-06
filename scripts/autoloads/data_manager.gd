@@ -17,7 +17,20 @@ var int_to_string_id = {
 	9: "stick",
 	10: "crafting_table",
 	11: "wooden_pickaxe",
-	12: "furnace"
+	12: "furnace",
+	13: "coal_ore",
+	14: "iron_ore",
+	15: "diamond_ore",
+	16: "wooden_axe",
+	17: "wooden_sword",
+	18: "wooden_shovel",
+	19: "stone_axe",
+	20: "stone_sword",
+	21: "stone_shovel",
+	22: "iron_pickaxe",
+	23: "iron_axe",
+	24: "iron_sword",
+	25: "iron_shovel"
 }
 
 # Ánh xạ ngược từ String ID sang Integer ID
@@ -30,6 +43,27 @@ func _ready():
 	
 	load_blocks_data()
 	load_recipes_and_tools()
+	load_uv_map()
+
+var uv_map = {}
+
+func load_uv_map():
+	var file = FileAccess.open("res://assets/textures/atlas_uv.json", FileAccess.READ)
+	if file:
+		var json = JSON.new()
+		if json.parse(file.get_as_text()) == OK:
+			uv_map = json.get_data()
+		else:
+			push_error("Lỗi phân tích cú pháp atlas_uv.json")
+
+func get_block_uv(block_id: int) -> Dictionary:
+	var b_data = get_block_data(block_id)
+	if b_data.has("texture"):
+		var tex_name = b_data["texture"].replace(".png", "")
+		if uv_map.has(tex_name):
+			return uv_map[tex_name]
+	return {"u_min": 0, "v_min": 0, "u_max": 0.05, "v_max": 0.05} # Fallback
+
 
 func load_blocks_data():
 	var file = FileAccess.open("res://docs/blocks_data.json", FileAccess.READ)
@@ -202,12 +236,27 @@ func get_recipe_output(grid_array: Array, columns: int) -> Dictionary:
 			var sh_h = shape.size()
 			var sh_w = 0 if sh_h == 0 else shape[0].size()
 			
-			if h != sh_h or w != sh_w: continue
-			
-			var match_all = true
+			var s_min_r = 100; var s_max_r = -1
+			var s_min_c = 100; var s_max_c = -1
 			for r in range(sh_h):
 				for c in range(sh_w):
-					var str_item = shape[r][c]
+					if shape[r][c] != null:
+						if r < s_min_r: s_min_r = r
+						if r > s_max_r: s_max_r = r
+						if c < s_min_c: s_min_c = c
+						if c > s_max_c: s_max_c = c
+			
+			if s_max_r == -1: continue
+			
+			var real_h = s_max_r - s_min_r + 1
+			var real_w = s_max_c - s_min_c + 1
+			
+			if h != real_h or w != real_w: continue
+			
+			var match_all = true
+			for r in range(real_h):
+				for c in range(real_w):
+					var str_item = shape[s_min_r + r][s_min_c + c]
 					var req_id = 0
 					if str_item != null: req_id = get_item_int_id(str_item)
 					if b_box[r][c] != req_id:

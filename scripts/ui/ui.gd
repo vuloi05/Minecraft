@@ -19,7 +19,7 @@ var is_crafting_table_open = false
 
 var selected_hotbar_index = 0
 var held_item = {"id": 0, "count": 0}
-var cursor_item: Label
+var cursor_item: InventorySlot
 
 func _ready():
 	# Khởi tạo data trống
@@ -219,19 +219,22 @@ func _ready():
 	loading_label.add_theme_font_size_override("font_size", 24)
 	loading_panel.add_child(loading_label)
 	
-	cursor_item = Label.new()
-	cursor_item.add_theme_font_size_override("font_size", 32)
-	cursor_item.add_theme_constant_override("outline_size", 4)
+	cursor_item = InventorySlot.new(-1, "cursor", self)
 	cursor_item.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cursor_item.z_index = 100
 	cursor_item.visible = false
+	# Ẩn background và border của slot vì ta chỉ cần icon và count
+	cursor_item.color = Color(0,0,0,0)
+	cursor_item.get_child(0).visible = false # Ẩn br
+	cursor_item.get_child(1).visible = false # Ẩn center
+	cursor_item.border.visible = false
 	$Control.add_child(cursor_item)
 	
 	select_hotbar(0)
 
 func _process(delta):
 	if cursor_item.visible:
-		cursor_item.global_position = get_viewport().get_mouse_position() + Vector2(10, 10)
+		cursor_item.global_position = get_viewport().get_mouse_position() - Vector2(24, 24)
 
 func update_slot(idx: int, id: int, count: int):
 	inv_data[idx].id = id
@@ -284,7 +287,9 @@ func get_selected_item_id() -> int:
 
 func consume_selected_item():
 	if inv_data[selected_hotbar_index].count > 0:
-		update_slot(selected_hotbar_index, inv_data[selected_hotbar_index].id, inv_data[selected_hotbar_index].count - 1)
+		var new_count = inv_data[selected_hotbar_index].count - 1
+		var new_id = inv_data[selected_hotbar_index].id if new_count > 0 else 0
+		update_slot(selected_hotbar_index, new_id, new_count)
 
 func select_hotbar(idx: int):
 	selected_hotbar_index = clamp(idx, 0, 8)
@@ -370,11 +375,12 @@ func on_slot_clicked(idx: int, button: int):
 func update_cursor():
 	if held_item.id != 0 and held_item.count > 0:
 		cursor_item.visible = true
-		cursor_item.text = inv_slots[0].get_icon(held_item.id) + ("\n" + str(held_item.count) if held_item.count > 1 else "")
+		cursor_item.update_item(held_item.id, held_item.count)
 	else:
 		cursor_item.visible = false
 		held_item.id = 0
 		held_item.count = 0
+		cursor_item.update_item(0, 0)
 
 func toggle_inventory(is_table: bool = false):
 	is_crafting_table_open = is_table

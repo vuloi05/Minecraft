@@ -1,0 +1,119 @@
+{
+    "blocks": [
+        {
+            "id": "dirt",
+            "display_name": "\u0110\u1ea5t",
+            "texture": "dirt.png"
+        },
+        {
+            "id": "grass_block",
+            "display_name": "Kh\u1ed1i C\u1ecf",
+            "texture": "grass_block_side.png"
+        },
+        {
+            "id": "stone",
+            "display_name": "\u0110\u00e1",
+            "texture": "stone.png"
+        },
+        {
+            "id": "cobblestone",
+            "display_name": "\u0110\u00e1 Cu\u1ed9i",
+            "texture": "cobblestone.png"
+        },
+        {
+            "id": "oak_log",
+            "display_name": "G\u1ed7 S\u1ed3i (Log)",
+            "texture": "oak_log.png"
+        },
+        {
+            "id": "oak_planks",
+            "display_name": "V\u00e1n G\u1ed7 S\u1ed3i",
+            "texture": "oak_planks.png"
+        },
+        {
+            "id": "oak_leaves",
+            "display_name": "L\u00e1 C\u00e2y S\u1ed3i",
+            "texture": "oak_leaves.png"
+        },
+        {
+            "id": "sand",
+            "display_name": "C\u00e1t",
+            "texture": "sand.png"
+        },
+        {
+            "id": "gravel",
+            "display_name": "S\u1ecfi",
+            "texture": "gravel.png"
+        },
+        {
+            "id": "coal_ore",
+            "display_name": "Qu\u1eb7ng Than",
+            "texture": "coal_ore.png"
+        },
+        {
+            "id": "iron_ore",
+            "display_name": "Qu\u1eb7ng S\u1eaft",
+            "texture": "iron_ore.png"
+        },
+        {
+            "id": "gold_ore",
+            "display_name": "Qu\u1eb7ng V\u00e0ng",
+            "texture": "gold_ore.png"
+        },
+        {
+            "id": "diamond_ore",
+            "display_name": "Qu\u1eb7ng Kim C\u01b0\u01a1ng",
+            "texture": "diamond_ore.png"
+        },
+        {
+            "id": "obsidian",
+            "display_name": "Obsidian",
+            "texture": "obsidian.png"
+        },
+        {
+            "id": "bedrock",
+            "display_name": "\u0110\u00e1 N\u1ec1n",
+            "texture": "bedrock.png"
+        },
+        {
+            "id": "glass",
+            "display_name": "K\u00ednh",
+            "texture": "glass.png"
+        },
+        {
+            "id": "crafting_table",
+            "display_name": "B\u00e0n Ch\u1ebf T\u1ea1o",
+            "texture": "crafting_table_front.png"
+        },
+        {
+            "id": "furnace",
+            "display_name": "L\u00f2 Nung",
+            "texture": "furnace_front.png"
+        },
+        {
+            "id": "chest",
+            "display_name": "R\u01b0\u01a1ng",
+            "texture": "chest.png"
+        },
+        {
+            "id": "torch",
+            "display_name": "\u0110u\u1ed1c",
+            "texture": "torch.png"
+        },
+        {
+            "id": "stick",
+            "display_name": "stick",
+            "texture": "stick.png"
+        },
+        {
+            "id": "wooden_pickaxe",
+            "display_name": "wooden_pickaxe",
+            "texture": "wooden_pickaxe.png"
+        },
+        {
+            "id": "stone_pickaxe",
+            "display_name": "stone_pickaxe",
+            "texture": "stone_pickaxe.png"
+        }
+    ]
+}

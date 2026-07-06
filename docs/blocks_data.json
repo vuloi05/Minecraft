@@ -25,7 +25,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Không cần công cụ để rơi vật phẩm, xẻng chỉ giúp đào nhanh hơn."
+            "note": "Không cần công cụ để rơi vật phẩm, xẻng chỉ giúp đào nhanh hơn.",
+            "texture": "dirt.png"
         },
         {
             "id": "grass_block",
@@ -41,7 +42,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Đào ra Đất, không rơi ra chính nó (trừ khi có công cụ Silk Touch nếu sau này bổ sung enchant)."
+            "note": "Đào ra Đất, không rơi ra chính nó (trừ khi có công cụ Silk Touch nếu sau này bổ sung enchant).",
+            "texture": "grass_block_side.png"
         },
         {
             "id": "stone",
@@ -57,7 +59,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Bắt buộc cần cuốc (tier gỗ trở lên) mới rơi vật phẩm. Không có cuốc -> không rơi gì cả."
+            "note": "Bắt buộc cần cuốc (tier gỗ trở lên) mới rơi vật phẩm. Không có cuốc -> không rơi gì cả.",
+            "texture": "stone.png"
         },
         {
             "id": "cobblestone",
@@ -72,7 +75,8 @@
                 }
             ],
             "gravity_affected": false,
-            "flammable": false
+            "flammable": false,
+            "texture": "cobblestone.png"
         },
         {
             "id": "oak_log",
@@ -88,7 +92,8 @@
             ],
             "gravity_affected": false,
             "flammable": true,
-            "note": "Không bắt buộc cần rìu để rơi vật phẩm, rìu chỉ giúp chặt nhanh hơn."
+            "note": "Không bắt buộc cần rìu để rơi vật phẩm, rìu chỉ giúp chặt nhanh hơn.",
+            "texture": "oak_log.png"
         },
         {
             "id": "oak_planks",
@@ -103,7 +108,8 @@
                 }
             ],
             "gravity_affected": false,
-            "flammable": true
+            "flammable": true,
+            "texture": "oak_planks.png"
         },
         {
             "id": "oak_leaves",
@@ -120,7 +126,8 @@
             ],
             "gravity_affected": false,
             "flammable": true,
-            "note": "Đào bằng tool thường: xác suất nhỏ rơi ra que hoặc quả táo (nếu là oak). Đào bằng kéo (shears): rơi ra chính lá."
+            "note": "Đào bằng tool thường: xác suất nhỏ rơi ra que hoặc quả táo (nếu là oak). Đào bằng kéo (shears): rơi ra chính lá.",
+            "texture": "oak_leaves.png"
         },
         {
             "id": "sand",
@@ -136,7 +143,8 @@
             ],
             "gravity_affected": true,
             "flammable": false,
-            "note": "Chịu ảnh hưởng trọng lực: nếu khối bên dưới bị phá, khối cát sẽ rơi xuống."
+            "note": "Chịu ảnh hưởng trọng lực: nếu khối bên dưới bị phá, khối cát sẽ rơi xuống.",
+            "texture": "sand.png"
         },
         {
             "id": "gravel",
@@ -157,7 +165,8 @@
                 }
             ],
             "gravity_affected": true,
-            "flammable": false
+            "flammable": false,
+            "texture": "gravel.png"
         },
         {
             "id": "coal_ore",
@@ -173,7 +182,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "spawn_depth_hint": "Phổ biến ở độ cao trung bình tới gần bề mặt, phổ biến nhất trong các loại quặng."
+            "spawn_depth_hint": "Phổ biến ở độ cao trung bình tới gần bề mặt, phổ biến nhất trong các loại quặng.",
+            "texture": "coal_ore.png"
         },
         {
             "id": "iron_ore",
@@ -189,7 +199,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Cần cuốc đá trở lên mới rơi vật phẩm. Quặng thô (raw_iron) phải nung ở Lò nung mới ra thỏi sắt."
+            "note": "Cần cuốc đá trở lên mới rơi vật phẩm. Quặng thô (raw_iron) phải nung ở Lò nung mới ra thỏi sắt.",
+            "texture": "iron_ore.png"
         },
         {
             "id": "gold_ore",
@@ -204,7 +215,8 @@
                 }
             ],
             "gravity_affected": false,
-            "flammable": false
+            "flammable": false,
+            "texture": "gold_ore.png"
         },
         {
             "id": "diamond_ore",
@@ -220,7 +232,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Cần cuốc sắt trở lên. Thường sinh ở độ sâu gần đáy bản đồ."
+            "note": "Cần cuốc sắt trở lên. Thường sinh ở độ sâu gần đáy bản đồ.",
+            "texture": "diamond_ore.png"
         },
         {
             "id": "obsidian",
@@ -236,7 +249,8 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Cần cuốc kim cương trở lên, độ cứng rất cao -> đào lâu nếu dùng tool yếu (hoặc coi như không đào được nếu chưa có tier 4)."
+            "note": "Cần cuốc kim cương trở lên, độ cứng rất cao -> đào lâu nếu dùng tool yếu (hoặc coi như không đào được nếu chưa có tier 4).",
+            "texture": "obsidian.png"
         },
         {
             "id": "bedrock",
@@ -247,7 +261,8 @@
             "drops": [],
             "gravity_affected": false,
             "flammable": false,
-            "note": "hardness = -1 nghĩa là không thể phá hủy trong Survival, dùng làm lớp đáy thế giới."
+            "note": "hardness = -1 nghĩa là không thể phá hủy trong Survival, dùng làm lớp đáy thế giới.",
+            "texture": "bedrock.png"
         },
         {
             "id": "glass",
@@ -258,7 +273,8 @@
             "drops": [],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Đào bằng tool thường sẽ vỡ và không rơi vật phẩm gì (giống bản gốc), trừ khi có Silk Touch."
+            "note": "Đào bằng tool thường sẽ vỡ và không rơi vật phẩm gì (giống bản gốc), trừ khi có Silk Touch.",
+            "texture": "glass.png"
         },
         {
             "id": "crafting_table",
@@ -273,7 +289,8 @@
                 }
             ],
             "gravity_affected": false,
-            "flammable": true
+            "flammable": true,
+            "texture": "crafting_table_front.png"
         },
         {
             "id": "furnace",
@@ -288,7 +305,8 @@
                 }
             ],
             "gravity_affected": false,
-            "flammable": false
+            "flammable": false,
+            "texture": "furnace_front.png"
         },
         {
             "id": "chest",
@@ -321,7 +339,213 @@
             "gravity_affected": false,
             "flammable": false,
             "light_level": 14,
-            "note": "hardness = 0 nghĩa là đào tức thời (instant break). Đuốc là block phát sáng, dùng light_level cho hệ thống lan truyền ánh sáng."
+            "note": "hardness = 0 nghĩa là đào tức thời (instant break). Đuốc là block phát sáng, dùng light_level cho hệ thống lan truyền ánh sáng.",
+            "texture": "torch.png",
+            "is_item": true
+        },
+        {
+            "id": "coal_ore",
+            "display_name": "Quặng Than",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 1,
+            "drops": [
+                {
+                    "item": "coal",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "coal_ore.png"
+        },
+        {
+            "id": "iron_ore",
+            "display_name": "Quặng Sắt",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 2,
+            "drops": [
+                {
+                    "item": "raw_iron",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_ore.png"
+        },
+        {
+            "id": "diamond_ore",
+            "display_name": "Quặng Kim Cương",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 3,
+            "drops": [
+                {
+                    "item": "diamond",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond_ore.png"
+        },
+        {
+            "id": "stick",
+            "display_name": "Que Gỗ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "stick.png",
+            "is_item": true
+        },
+        {
+            "id": "wooden_pickaxe",
+            "display_name": "Cúp Gỗ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "wooden_pickaxe.png",
+            "is_item": true
+        },
+        {
+            "id": "stone_pickaxe",
+            "display_name": "Cúp Đá",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "stone_pickaxe.png",
+            "is_item": true
+        },
+        {
+            "id": "wooden_axe",
+            "display_name": "Rìu Gỗ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "wooden_axe.png",
+            "is_item": true
+        },
+        {
+            "id": "wooden_sword",
+            "display_name": "Kiếm Gỗ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "wooden_sword.png",
+            "is_item": true
+        },
+        {
+            "id": "wooden_shovel",
+            "display_name": "Xẻng Gỗ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "wooden_shovel.png",
+            "is_item": true
+        },
+        {
+            "id": "stone_axe",
+            "display_name": "Rìu Đá",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "stone_axe.png",
+            "is_item": true
+        },
+        {
+            "id": "stone_sword",
+            "display_name": "Kiếm Đá",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "stone_sword.png",
+            "is_item": true
+        },
+        {
+            "id": "stone_shovel",
+            "display_name": "Xẻng Đá",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "stone_shovel.png",
+            "is_item": true
+        },
+        {
+            "id": "iron_pickaxe",
+            "display_name": "Cúp Sắt",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_pickaxe.png",
+            "is_item": true
+        },
+        {
+            "id": "iron_axe",
+            "display_name": "Rìu Sắt",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_axe.png",
+            "is_item": true
+        },
+        {
+            "id": "iron_sword",
+            "display_name": "Kiếm Sắt",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_sword.png",
+            "is_item": true
+        },
+        {
+            "id": "iron_shovel",
+            "display_name": "Xẻng Sắt",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_shovel.png",
+            "is_item": true
         }
     ]
 }

@@ -22,11 +22,13 @@ var collision_pool = []
 var active_collisions = 0
 
 var noise: FastNoiseLite
+var cave_noise: FastNoiseLite
 var world_ref: Node3D
 
-func _init(_pos: Vector2i, _noise: FastNoiseLite, _mat: StandardMaterial3D, _world: Node3D):
+func _init(_pos: Vector2i, _noise: FastNoiseLite, _mat: StandardMaterial3D, _world: Node3D, _cave_noise: FastNoiseLite = null):
 	chunk_pos = _pos
 	noise = _noise
+	cave_noise = _cave_noise
 	world_ref = _world
 	
 	position = Vector3(chunk_pos.x * CHUNK_SIZE_X, 0, chunk_pos.y * CHUNK_SIZE_Z)
@@ -71,25 +73,52 @@ func generate_blocks():
 			var terrain_height = int((noise.get_noise_2d(global_x, global_z) + 1.0) * 0.5 * 20) + 10
 			
 			for y in range(terrain_height + 1):
-				if y == terrain_height:
-					blocks[x][y][z] = 1 # Cỏ (Grass Block)
-				elif y > terrain_height - 4:
-					blocks[x][y][z] = 8 # Đất (Dirt)
+				var block_id = 7 # Mặc định là Đá (Stone)
+				var depth = terrain_height - y
+				
+				if depth == 0:
+					block_id = 1 # Grass Block
+				elif depth < 4:
+					block_id = 8 # Dirt
 				else:
-					blocks[x][y][z] = 7 # Đá (Stone)
+					# Thêm khoáng sản ngẫu nhiên khi đào sâu
+					if randf() < 0.005 and y < 15: # Diamond Ore
+						block_id = 15
+					elif randf() < 0.02 and y < 30: # Iron Ore
+						block_id = 14
+					elif randf() < 0.04: # Coal Ore
+						block_id = 13
 				
-			# Trồng cây (Tỷ lệ 1%, chỉ mọc nếu cách rìa để tránh lỗi mảng)
-			if randf() < 0.01 and terrain_height + 5 < CHUNK_SIZE_Y and x > 1 and x < CHUNK_SIZE_X - 2 and z > 1 and z < CHUNK_SIZE_Z - 2:
-				blocks[x][terrain_height + 1][z] = 2 # Gỗ
-				blocks[x][terrain_height + 2][z] = 2
-				blocks[x][terrain_height + 3][z] = 2
+				# Kiểm tra Hang động (Cave Carving)
+				if cave_noise != null and depth > 4:
+					var cave_val = cave_noise.get_noise_3d(global_x, y, global_z)
+					if cave_val > 0.4: # Ngưỡng tạo hang, số càng cao hang càng hẹp
+						block_id = 0 # Trở thành không khí
 				
-				# Lá cây (ID 4)
-				blocks[x][terrain_height + 4][z] = 4
-				blocks[x-1][terrain_height + 3][z] = 4
-				blocks[x+1][terrain_height + 3][z] = 4
-				blocks[x][terrain_height + 3][z-1] = 4
-				blocks[x][terrain_height + 3][z+1] = 4
+				blocks[x][y][z] = block_id
+				
+			# Trồng cây sồi (Oak tree)
+			if randf() < 0.01 and terrain_height + 6 < CHUNK_SIZE_Y and x > 2 and x < CHUNK_SIZE_X - 3 and z > 2 and z < CHUNK_SIZE_Z - 3:
+				var tree_height = randi() % 3 + 4 # Cao từ 4-6 lốc
+				
+				# Vẽ Thân cây
+				for i in range(tree_height):
+					blocks[x][terrain_height + 1 + i][z] = 2
+					
+				# Vẽ Tán lá
+				var leaf_bottom = terrain_height + tree_height - 2
+				for ly in range(leaf_bottom, leaf_bottom + 4):
+					var radius = 2 if ly < leaf_bottom + 2 else 1
+					for lx in range(-radius, radius + 1):
+						for lz in range(-radius, radius + 1):
+							# Bo tròn góc tán lá
+							if abs(lx) == radius and abs(lz) == radius and (ly == leaf_bottom or ly == leaf_bottom + 3 or randf() < 0.5):
+								continue
+							var px = x + lx
+							var pz = z + lz
+							# Nếu đang là không khí thì điền lá vào
+							if blocks[px][ly][pz] == 0:
+								blocks[px][ly][pz] = 4
 
 	is_data_ready = true
 
@@ -209,35 +238,78 @@ func get_block_color(block_id: int) -> Color:
 	elif block_id == 8: return Color(0.52, 0.37, 0.26) # Đất
 	return Color(1, 1, 1)
 
-func add_quad(local_st: SurfaceTool, v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, color: Color):
+func add_quad(local_st: SurfaceTool, v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, uv_rect: Dictionary, color: Color = Color(1, 1, 1)):
 	local_st.set_normal(normal)
 	local_st.set_color(color)
-	local_st.set_uv(Vector2(0, 0)); local_st.add_vertex(v0)
-	local_st.set_uv(Vector2(1, 0)); local_st.add_vertex(v1)
-	local_st.set_uv(Vector2(1, 1)); local_st.add_vertex(v2)
-	local_st.set_uv(Vector2(0, 0)); local_st.add_vertex(v0)
-	local_st.set_uv(Vector2(1, 1)); local_st.add_vertex(v2)
-	local_st.set_uv(Vector2(0, 1)); local_st.add_vertex(v3)
+	local_st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_max)); local_st.add_vertex(v0) # Bottom-Left
+	local_st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_min)); local_st.add_vertex(v1) # Top-Left
+	local_st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_min)); local_st.add_vertex(v2) # Top-Right
+	
+	local_st.set_normal(normal)
+	local_st.set_color(color)
+	local_st.set_uv(Vector2(uv_rect.u_min, uv_rect.v_max)); local_st.add_vertex(v0) # Bottom-Left
+	local_st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_min)); local_st.add_vertex(v2) # Top-Right
+	local_st.set_uv(Vector2(uv_rect.u_max, uv_rect.v_max)); local_st.add_vertex(v3) # Bottom-Right
 
 func create_block_mesh(local_st: SurfaceTool, x: int, y: int, z: int):
 	var block_id = blocks[x][y][z]
-	if block_id == 0 or block_id == 5: return # Không vẽ Air và Đuốc (Đuốc vẽ bằng Sprite3D)
+	if block_id == 0: return # Không vẽ Air
 	
 	var pos = Vector3(x, y, z)
 	
-	var color_top = get_block_color(block_id)
-	var color_bottom = color_top
-	var color_side = color_top
+	var uv_top = DataManager.get_block_uv(block_id)
+	var uv_bottom = uv_top
+	var uv_side = uv_top
 	
-	if block_id == 1: # Grass Block
-		color_top = Color(0.3, 0.6, 0.2) # Mặt cỏ xanh
-		color_bottom = Color(0.52, 0.37, 0.26) # Mặt đất nâu
-		color_side = Color(0.52, 0.37, 0.26) # Cạnh bên nâu
+	var top_color = Color(1, 1, 1)
+	var bottom_color = Color(1, 1, 1)
+	var side_color = Color(1, 1, 1)
+	
+	if block_id == 1: # Grass Block special logic
+		top_color = Color(0.4, 0.7, 0.3) # Nhuộm mặt trên màu xanh cỏ
+		if DataManager.uv_map.has("grass_block_top"):
+			uv_top = DataManager.uv_map["grass_block_top"]
+		elif DataManager.uv_map.has("grass_block_side"):
+			uv_top = DataManager.uv_map["grass_block_side"]
+			
+		if DataManager.uv_map.has("dirt"):
+			uv_bottom = DataManager.uv_map["dirt"]
+			
+		if DataManager.uv_map.has("grass_block_side"):
+			uv_side = DataManager.uv_map["grass_block_side"]
+			
+	elif block_id == 4: # Lá cây
+		top_color = Color(0.2, 0.55, 0.1)
+		bottom_color = top_color
+		side_color = top_color
 		
 	var v_sx = 0.5
 	var v_sy = 0.5
 	var v_sz = 0.5
 	var y_offset = 0.0
+	
+	if block_id == 5: # Torch
+		v_sx = 0.0625 # Rộng 2 pixel (2/16 = 0.125, bán kính = 0.0625)
+		v_sy = 0.3125 # Cao 10 pixel (10/16 = 0.625, bán kính = 0.3125)
+		v_sz = 0.0625 # Dày 2 pixel
+		y_offset = -0.1875 # Dịch xuống đáy ô (0.5 - 0.3125 = 0.1875)
+		
+		# Cắt chính xác phần hình ảnh cây đuốc (từ pixel 7->9 theo chiều ngang, 6->16 theo chiều dọc)
+		var u_w = uv_top.u_max - uv_top.u_min
+		var v_h = uv_top.v_max - uv_top.v_min
+		uv_side = {
+			"u_min": uv_top.u_min + u_w * (7.0/16.0),
+			"u_max": uv_top.u_min + u_w * (9.0/16.0),
+			"v_min": uv_top.v_min + v_h * (6.0/16.0),
+			"v_max": uv_top.v_max
+		}
+		uv_top = {
+			"u_min": uv_top.u_min + u_w * (7.0/16.0),
+			"u_max": uv_top.u_min + u_w * (9.0/16.0),
+			"v_min": uv_top.v_min + v_h * (6.0/16.0),
+			"v_max": uv_top.v_min + v_h * (8.0/16.0)
+		}
+		uv_bottom = uv_top
 		
 	var v0 = pos + Vector3(-v_sx, -v_sy + y_offset, -v_sz)
 	var v1 = pos + Vector3(v_sx, -v_sy + y_offset, -v_sz)
@@ -248,9 +320,10 @@ func create_block_mesh(local_st: SurfaceTool, x: int, y: int, z: int):
 	var v6 = pos + Vector3(v_sx, v_sy + y_offset, v_sz)
 	var v7 = pos + Vector3(-v_sx, v_sy + y_offset, v_sz)
 
-	if is_transparent(get_block(x, y, z + 1)): add_quad(local_st, v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
-	if is_transparent(get_block(x, y, z - 1)): add_quad(local_st, v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
-	if is_transparent(get_block(x + 1, y, z)): add_quad(local_st, v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
-	if is_transparent(get_block(x - 1, y, z)): add_quad(local_st, v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
-	if is_transparent(get_block(x, y + 1, z)): add_quad(local_st, v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
-	if is_transparent(get_block(x, y - 1, z)): add_quad(local_st, v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
+	# Bỏ qua kiểm tra is_block_exposed nếu là Đuốc vì đuốc nhỏ luôn thấy các mặt
+	if block_id == 5 or is_block_exposed(x, y, z + 1): add_quad(local_st, v4, v7, v6, v5, Vector3(0, 0, 1), uv_side, side_color)
+	if block_id == 5 or is_block_exposed(x, y, z - 1): add_quad(local_st, v1, v2, v3, v0, Vector3(0, 0, -1), uv_side, side_color)
+	if block_id == 5 or is_block_exposed(x + 1, y, z): add_quad(local_st, v5, v6, v2, v1, Vector3(1, 0, 0), uv_side, side_color)
+	if block_id == 5 or is_block_exposed(x - 1, y, z): add_quad(local_st, v0, v3, v7, v4, Vector3(-1, 0, 0), uv_side, side_color)
+	if block_id == 5 or is_block_exposed(x, y + 1, z): add_quad(local_st, v7, v3, v2, v6, Vector3(0, 1, 0), uv_top, top_color)
+	if block_id == 5 or is_block_exposed(x, y - 1, z): add_quad(local_st, v0, v4, v5, v1, Vector3(0, -1, 0), uv_bottom, bottom_color)
