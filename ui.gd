@@ -169,9 +169,9 @@ func _ready():
 		main_grid.add_child(slot)
 		
 	# Khoảng hở nhỏ giữa túi chính và túi nhanh (Hotbar)
-	var spacer = Control.new()
-	spacer.custom_minimum_size = Vector2(0, 10)
-	inv_vbox.add_child(spacer)
+	var inv_spacer = Control.new()
+	inv_spacer.custom_minimum_size = Vector2(0, 10)
+	inv_vbox.add_child(inv_spacer)
 	
 	# Index 0-8 (Hotbar trong túi)
 	var inv_hotbar = GridContainer.new()
