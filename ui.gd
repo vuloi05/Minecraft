@@ -14,6 +14,8 @@ var inv_slots = [] # Các ô UI trong túi đồ
 var hud_hotbar_slots = [] # 9 ô UI dưới HUD
 
 var selected_hotbar_index = 0
+var held_item = {"id": 0, "count": 0}
+var cursor_item: Label
 
 func _ready():
 	# Khởi tạo data trống
@@ -82,8 +84,16 @@ func _ready():
 	
 	# --- MÀN HÌNH TÚI ĐỒ (INVENTORY) ---
 	inventory_panel = Panel.new()
-	inventory_panel.custom_minimum_size = Vector2(600, 400)
+	inventory_panel.custom_minimum_size = Vector2(500, 480)
 	inventory_panel.set_anchors_preset(Control.PRESET_CENTER)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color("#C6C6C6")
+	style.border_width_left = 4
+	style.border_width_top = 4
+	style.border_width_right = 4
+	style.border_width_bottom = 4
+	style.border_color = Color("#373737")
+	inventory_panel.add_theme_stylebox_override("panel", style)
 	inventory_panel.visible = false
 	$Control.add_child(inventory_panel)
 	
@@ -94,9 +104,14 @@ func _ready():
 	inventory_panel.add_child(inv_vbox)
 	
 	# Phần trên: Chế tạo
+	var craft_label = Label.new()
+	craft_label.text = "Crafting"
+	craft_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
+	inv_vbox.add_child(craft_label)
+	
 	var top_hbox = HBoxContainer.new()
 	top_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	top_hbox.add_theme_constant_override("separation", 50)
+	top_hbox.add_theme_constant_override("separation", 30)
 	inv_vbox.add_child(top_hbox)
 	
 	var craft_grid = GridContainer.new()
@@ -164,7 +179,19 @@ func _ready():
 	loading_label.add_theme_font_size_override("font_size", 24)
 	loading_panel.add_child(loading_label)
 	
+	cursor_item = Label.new()
+	cursor_item.add_theme_font_size_override("font_size", 32)
+	cursor_item.add_theme_constant_override("outline_size", 4)
+	cursor_item.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cursor_item.z_index = 100
+	cursor_item.visible = false
+	$Control.add_child(cursor_item)
+	
 	select_hotbar(0)
+
+func _process(delta):
+	if cursor_item.visible:
+		cursor_item.global_position = get_viewport().get_mouse_position() + Vector2(10, 10)
 
 func update_slot(idx: int, id: int, count: int):
 	inv_data[idx].id = id
@@ -254,52 +281,82 @@ func select_hotbar(idx: int):
 			hud_hotbar_slots[i].border.border_color = Color(0.1, 0.1, 0.1)
 			hud_hotbar_slots[i].border.border_width = 2.0
 
-# --- DRAG & DROP CALLBACKS ---
-func on_drag_start(idx: int, take_count: int):
-	if idx == 40: # Rút đồ từ Crafting Result
-		var id = inv_data[idx].id
-		var count = inv_data[idx].count
-		# Giảm đồ trong lưới
-		for i in range(36, 40):
-			if inv_data[i].count > 0:
-				update_slot(i, inv_data[i].id, inv_data[i].count - 1)
-		# Ô 40 sẽ tự động cập nhật qua check_crafting
-	else:
-		update_slot(idx, inv_data[idx].id, inv_data[idx].count - take_count)
-
-func on_drop(data: Dictionary, target_idx: int):
-	var src = data.source_index
-	var id = data.id
-	var c = data.count
+# --- CLICK TO HOLD (NEW LOGIC) ---
+func on_slot_clicked(idx: int, button: int):
+	var is_left = (button == MOUSE_BUTTON_LEFT)
+	var is_right = (button == MOUSE_BUTTON_RIGHT)
+	if not is_left and not is_right: return
 	
-	if target_idx == 40: # Không thể thả vào ô Result
-		update_slot(src, inv_data[src].id, inv_data[src].count + c)
+	var s_id = inv_data[idx].id
+	var s_count = inv_data[idx].count
+	var h_id = held_item.id
+	var h_count = held_item.count
+	
+	if idx == 40: # Ô Result
+		if s_id != 0:
+			if h_id == 0 or (h_id == s_id and h_count + s_count <= 64):
+				# Lấy đồ
+				held_item.id = s_id
+				held_item.count = h_count + s_count
+				# Giảm nguyên liệu
+				for i in range(36, 40):
+					if inv_data[i].count > 0:
+						update_slot(i, inv_data[i].id, inv_data[i].count - 1)
+				update_cursor()
 		return
 		
-	# Nếu ô đích trống
-	if inv_data[target_idx].id == 0:
-		update_slot(target_idx, id, c)
-	# Nếu ô đích cùng loại
-	elif inv_data[target_idx].id == id:
-		var total = inv_data[target_idx].count + c
-		if total <= 64:
-			update_slot(target_idx, id, total)
-		else:
-			update_slot(target_idx, id, 64)
-			var dư = total - 64
-			# Trả về gốc
-			update_slot(src, id, inv_data[src].count + dư)
-	# Nếu ô đích khác loại (Swap)
+	if h_id == 0:
+		# Đang tay không
+		if s_id != 0:
+			if is_left: # Nhấc hết
+				held_item.id = s_id
+				held_item.count = s_count
+				update_slot(idx, 0, 0)
+			elif is_right: # Nhấc một nửa
+				var half = ceil(float(s_count) / 2.0)
+				var left = s_count - half
+				held_item.id = s_id
+				held_item.count = half
+				update_slot(idx, s_id, left)
 	else:
-		var old_id = inv_data[target_idx].id
-		var old_c = inv_data[target_idx].count
-		update_slot(target_idx, id, c)
-		# Swap đồ về ô gốc
-		# Nếu ô gốc là Result (40) thì ko swap đc, ném ra ngoài (tạm thời nhét vào túi)
-		if src == 40:
-			add_item(old_id, old_c)
+		# Đang cầm đồ
+		if s_id == 0:
+			if is_left: # Đặt hết
+				update_slot(idx, h_id, h_count)
+				held_item.id = 0
+				held_item.count = 0
+			elif is_right: # Đặt 1
+				update_slot(idx, h_id, 1)
+				held_item.count -= 1
+				if held_item.count <= 0: held_item.id = 0
+		elif s_id == h_id:
+			if is_left: # Gộp hết
+				var space = 64 - s_count
+				var add = min(space, h_count)
+				update_slot(idx, h_id, s_count + add)
+				held_item.count -= add
+				if held_item.count <= 0: held_item.id = 0
+			elif is_right: # Gộp 1
+				if s_count < 64:
+					update_slot(idx, h_id, s_count + 1)
+					held_item.count -= 1
+					if held_item.count <= 0: held_item.id = 0
 		else:
-			update_slot(src, old_id, inv_data[src].count + old_c)
+			if is_left: # Hoán đổi (Swap)
+				update_slot(idx, h_id, h_count)
+				held_item.id = s_id
+				held_item.count = s_count
+				
+	update_cursor()
+
+func update_cursor():
+	if held_item.id != 0 and held_item.count > 0:
+		cursor_item.visible = true
+		cursor_item.text = inv_slots[0].get_icon(held_item.id) + ("\n" + str(held_item.count) if held_item.count > 1 else "")
+	else:
+		cursor_item.visible = false
+		held_item.id = 0
+		held_item.count = 0
 
 func toggle_inventory():
 	inventory_panel.visible = !inventory_panel.visible
@@ -307,6 +364,12 @@ func toggle_inventory():
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	else:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		# Vứt đồ lại vào túi nếu đóng túi mà vẫn đang cầm
+		if held_item.id != 0:
+			add_item(held_item.id, held_item.count)
+			held_item.id = 0
+			held_item.count = 0
+			update_cursor()
 
 func update_hp(hp: int):
 	var full = int(ceil(hp / 2.0))

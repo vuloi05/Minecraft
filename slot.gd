@@ -16,12 +16,28 @@ func _init(idx: int, type: String, ui: Node):
 	slot_type = type
 	ui_node = ui
 	custom_minimum_size = Vector2(48, 48)
-	color = Color(0.2, 0.2, 0.2, 0.8)
+	color = Color("#373737") # Nền dưới cùng (viền tối ở trên-trái)
+	
+	var br = ColorRect.new()
+	br.color = Color("#FFFFFF") # Viền sáng ở dưới-phải
+	br.set_anchors_preset(Control.PRESET_FULL_RECT)
+	br.offset_left = 2
+	br.offset_top = 2
+	add_child(br)
+	
+	var center = ColorRect.new()
+	center.color = Color("#8B8B8B") # Màu nền chính giữa
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.offset_left = 2
+	center.offset_top = 2
+	center.offset_right = -2
+	center.offset_bottom = -2
+	add_child(center)
 	
 	border = ReferenceRect.new()
 	border.set_anchors_preset(Control.PRESET_FULL_RECT)
-	border.border_color = Color(0.1, 0.1, 0.1)
-	border.border_width = 2.0
+	border.border_color = Color(0.1, 0.1, 0.1, 0.0) # Ẩn viền đen mặc định
+	border.border_width = 3.0
 	border.editor_only = false
 	add_child(border)
 	
@@ -86,32 +102,8 @@ func get_icon(id: int) -> String:
 		11: return "🪓" # Cuốc gỗ
 	return ""
 
-# --- DRAG AND DROP ---
-func _get_drag_data(at_position):
-	if item_id == 0: return null
-	
-	# Hỗ trợ chuột phải để chia đôi stack
-	var is_right_click = Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
-	var take_count = item_count
-	
-	if is_right_click and item_count > 1:
-		take_count = item_count / 2
-		
-	var data = {"source_index": slot_index, "source_type": slot_type, "id": item_id, "count": take_count}
-	
-	var preview = Label.new()
-	preview.text = get_icon(item_id)
-	preview.add_theme_font_size_override("font_size", 32)
-	set_drag_preview(preview)
-	
-	if ui_node and ui_node.has_method("on_drag_start"):
-		ui_node.on_drag_start(slot_index, take_count)
-	
-	return data
-
-func _can_drop_data(at_position, data):
-	return typeof(data) == TYPE_DICTIONARY and data.has("id") and slot_type != "result"
-
-func _drop_data(at_position, data):
-	if ui_node and ui_node.has_method("on_drop"):
-		ui_node.on_drop(data, slot_index)
+# --- CLICK TO HOLD ---
+func _gui_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		if ui_node and ui_node.has_method("on_slot_clicked"):
+			ui_node.on_slot_clicked(slot_index, event.button_index)

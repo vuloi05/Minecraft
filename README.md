@@ -20,11 +20,13 @@
 - Tối ưu hóa: Chỉ các bề mặt lộ ra ngoài (Exposed Faces) mới được Engine render (thuật toán Greedy Meshing cơ bản), giúp game đạt FPS rất cao.
 
 ### 4. Hệ Thống Giao Diện & Túi Đồ (UI/Inventory/Crafting)
-- **Túi Đồ Hoàn Chỉnh (Full Inventory):** Nhấn phím `E` hoặc `TAB` để mở màn hình quản lý hành trang.
-  - Bao gồm 27 ô chứa đồ dự trữ (Main Inventory) và 9 ô thao tác nhanh (Hotbar).
-  - Tích hợp sẵn lưới **Crafting 2x2** bên trong túi đồ để chế tạo nhanh (gỗ ra ván, ván ra que, chế tạo cuốc chim).
-  - Hệ thống dữ liệu Crafting được xây dựng chuẩn mực bằng cơ chế **Dictionary (Data-driven)** độc lập và dễ dàng mở rộng.
-- **Kéo Thả (Drag & Drop):** Hỗ trợ thao tác kéo thả mượt mà giữa các ô đồ. Đặc biệt hỗ trợ **Chuột phải** để chia đôi số lượng vật phẩm (Split stack) hệt như Minecraft thật.
+- **Túi Đồ Giao Diện Cổ Điển:** Nhấn phím `E` hoặc `TAB` để mở màn hình quản lý hành trang.
+  - Giao diện được thiết kế với khung xám chuẩn mực, các ô đồ (Slots) có hiệu ứng dập nổi/chìm (Bevel) y hệt Minecraft gốc.
+  - Bao gồm 27 ô chứa đồ dự trữ (Main Inventory), 9 ô thao tác nhanh (Hotbar), và khu vực Crafting 2x2.
+- **Tương Tác Click-to-Hold:** Khác với cơ chế Drag & Drop thông thường, dự án đã mô phỏng lại chính xác cơ chế "cầm đồ" của Minecraft:
+  - **Chuột trái:** Nhấc toàn bộ / Đặt toàn bộ / Hoán đổi vị trí đồ.
+  - **Chuột phải:** Nhấc một nửa (1/2) số lượng / Nhả 1 vật phẩm duy nhất xuống ô (rất hữu ích khi chia đều nguyên liệu craft).
+  - Có một "con trỏ ảo" luôn theo sát chuột để hiển thị vật phẩm đang cầm trên tay.
 - **Tooltip Hiện Đại:** Tự động hiển thị tên vật phẩm khi bạn di chuột qua các icon trong Inventory.
 - **Thanh Hotbar & Trạng Thái:**
   - Thanh công cụ 9 ô ở cạnh dưới màn hình, hiển thị icon và số lượng vật phẩm.
