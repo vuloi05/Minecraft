@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://cx1g0wkq3n00k"]
 
-[ext_resource type="Script" path="res://player.gd" id="1_script"]
-[ext_resource type="Script" path="res://world.gd" id="2_world"]
-[ext_resource type="Script" path="res://day_night.gd" id="3_daynight"]
-[ext_resource type="PackedScene" uid="uid://cxabdef" path="res://UI.tscn" id="4_ui"]
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/world/world.gd" id="2_world"]
+[ext_resource type="Script" path="res://scripts/world/day_night.gd" id="3_daynight"]
+[ext_resource type="PackedScene" uid="uid://cxabdef" path="res://scenes/UI.tscn" id="4_ui"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_abc12"]
 sky_horizon_color = Color(0.646, 0.656, 0.67, 1)

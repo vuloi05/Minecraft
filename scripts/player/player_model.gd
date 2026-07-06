@@ -16,7 +16,7 @@ var steve_material: StandardMaterial3D
 func _init():
 	# Tạo Material
 	steve_material = StandardMaterial3D.new()
-	var tex = load("res://steve.png")
+	var tex = load("res://assets/textures/entity/steve.png")
 	if tex:
 		steve_material.albedo_texture = tex
 		steve_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST # Pixel art

@@ -37,7 +37,7 @@ var hit_time = 0.0
 @onready var raycast = $Camera3D/RayCast3D
 var world_node: Node3D
 
-var player_model_script = preload("res://player_model.gd")
+var player_model_script = preload("res://scripts/player/player_model.gd")
 var player_model: Node3D
 var spring_arm: SpringArm3D
 var camera_mode = 0 # 0: First, 1: Third Back, 2: Third Front
@@ -125,10 +125,10 @@ func update_hand(id: int):
 		var tex_path = ""
 		var is_tool = false
 		if id == 6:
-			tex_path = "res://Stone_Pickaxe_JE2_BE2.png"
+			tex_path = "res://assets/textures/items/Stone_Pickaxe_JE2_BE2.png"
 			is_tool = true
 		elif id == 5:
-			tex_path = "res://Torch_%28texture%29_JE3_BE2.webp"
+			tex_path = "res://assets/textures/items/Torch_(texture)_JE3_BE2.webp"
 			is_tool = false
 			
 		if tex_path != "" and (FileAccess.file_exists(tex_path) or FileAccess.file_exists(tex_path + ".import")):

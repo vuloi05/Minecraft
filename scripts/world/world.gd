@@ -232,7 +232,7 @@ func set_block(global_pos: Vector3, block_type: int):
 				torch_node.position = pos
 				
 				# Vẽ đuốc bằng Sprite3D (Crossed planes)
-				var tex = load("res://Torch.webp") as Texture2D
+				var tex = load("res://assets/textures/blocks/Torch.webp") as Texture2D
 				if tex != null:
 					var p_size = 0.04
 					
