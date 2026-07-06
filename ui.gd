@@ -9,7 +9,7 @@ var loading_panel: ColorRect
 var loading_label: Label
 
 var inventory_overlay: ColorRect
-var inventory_panel: Panel
+var inventory_panel: PanelContainer
 var inv_data = [] # Mảng 41 ô đồ {id, count}
 var inv_slots = [] # Các ô UI trong túi đồ
 var hud_hotbar_slots = [] # 9 ô UI dưới HUD
