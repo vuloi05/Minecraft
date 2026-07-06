@@ -209,9 +209,19 @@ func _unhandled_input(event):
 			var hit_point = raycast.get_collision_point()
 			var hit_normal = raycast.get_collision_normal()
 			
+			var target_pos = hit_point - hit_normal * 0.5
+			var target_grid_pos = Vector3(round(target_pos.x), round(target_pos.y), round(target_pos.z))
+			var target_block = world_node.get_block_global(target_grid_pos.x, target_grid_pos.y, target_grid_pos.z)
+			
+			if target_block == 10:
+				if ui: ui.toggle_inventory(true)
+				return
+			
 			var selected_block = 0
 			if ui: selected_block = ui.get_selected_item_id()
-			if selected_block == 0 or selected_block == 6: return # Cuốc hoặc ô trống không đặt được
+			
+			# Ngăn đặt block nếu cầm công cụ
+			if selected_block == 0 or selected_block == 6 or selected_block == 11: return
 			
 			var block_pos = hit_point + hit_normal * 0.5
 			var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))

@@ -10,9 +10,12 @@ var loading_label: Label
 
 var inventory_overlay: ColorRect
 var inventory_panel: PanelContainer
-var inv_data = [] # Mảng 41 ô đồ {id, count}
+var inv_data = [] # Mảng 46 ô đồ {id, count}
 var inv_slots = [] # Các ô UI trong túi đồ
 var hud_hotbar_slots = [] # 9 ô UI dưới HUD
+
+var craft_grid: GridContainer
+var is_crafting_table_open = false
 
 var selected_hotbar_index = 0
 var held_item = {"id": 0, "count": 0}
@@ -20,7 +23,7 @@ var cursor_item: Label
 
 func _ready():
 	# Khởi tạo data trống
-	for i in range(41):
+	for i in range(46):
 		inv_data.append({"id": 0, "count": 0})
 		
 	# --- MÀN HÌNH CHÍNH (HUD) ---
@@ -133,15 +136,16 @@ func _ready():
 	craft_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
 	craft_vbox.add_child(craft_label)
 	
-	var craft_grid = GridContainer.new()
+	craft_grid = GridContainer.new()
 	craft_grid.columns = 2
 	craft_grid.add_theme_constant_override("h_separation", 2)
 	craft_grid.add_theme_constant_override("v_separation", 2)
 	craft_vbox.add_child(craft_grid)
 	
-	# Index 36-39
-	for i in range(36, 40):
+	# Index 36-44
+	for i in range(36, 45):
 		var slot = InventorySlot.new(i, "craft", self)
+		if i >= 40: slot.visible = false
 		inv_slots.append(slot)
 		craft_grid.add_child(slot)
 		
@@ -151,7 +155,7 @@ func _ready():
 	arrow.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
 	top_hbox.add_child(arrow)
 	
-	var res_slot = InventorySlot.new(40, "result", self)
+	var res_slot = InventorySlot.new(45, "result", self)
 	inv_slots.append(res_slot)
 	top_hbox.add_child(res_slot)
 	
@@ -182,16 +186,21 @@ func _ready():
 	
 	# Phải sort array inv_slots cho đúng index để dễ truy cập
 	var temp_inv_slots = []
-	for i in range(41): temp_inv_slots.append(null)
+	for i in range(46): temp_inv_slots.append(null)
 	
 	for i in range(9):
 		var slot = InventorySlot.new(i, "main", self)
 		temp_inv_slots[i] = slot
 		inv_hotbar.add_child(slot)
 		
-	for i in range(9, 36): temp_inv_slots[i] = inv_slots[i - 4]
-	for i in range(36, 40): temp_inv_slots[i] = inv_slots[i - 36]
-	temp_inv_slots[40] = inv_slots[4]
+	for i in range(9, 36): temp_inv_slots[i] = inv_slots[i - 4 + 5] # Chú ý: inv_slots có result slot là cái cuối, craft là trước đó
+	# inv_slots order created:
+	# 0..8: craft (36-44)
+	# 9: result (45)
+	# 10..36: main (9-35)
+	for i in range(36, 45): temp_inv_slots[i] = inv_slots[i - 36]
+	temp_inv_slots[45] = inv_slots[9]
+	for i in range(9, 36): temp_inv_slots[i] = inv_slots[i + 1]
 	
 	inv_slots = temp_inv_slots
 	
@@ -230,50 +239,25 @@ func update_slot(idx: int, id: int, count: int):
 	if inv_slots[idx]: inv_slots[idx].update_item(id, count)
 	if idx < 9: hud_hotbar_slots[idx].update_item(id, count)
 	
-	if idx >= 36 and idx <= 39:
+	if idx >= 36 and idx <= 44:
 		check_crafting()
 
-var crafting_recipes = [
-	# Gỗ -> 4 Ván (có thể đặt ở 4 góc)
-	{ "input": [2, 0, 0, 0], "output": 3, "count": 4 },
-	{ "input": [0, 2, 0, 0], "output": 3, "count": 4 },
-	{ "input": [0, 0, 2, 0], "output": 3, "count": 4 },
-	{ "input": [0, 0, 0, 2], "output": 3, "count": 4 },
-	# 2 Ván (dọc) -> 4 Que
-	{ "input": [3, 0, 3, 0], "output": 9, "count": 4 },
-	{ "input": [0, 3, 0, 3], "output": 9, "count": 4 },
-	# 4 Ván -> 1 Bàn chế tạo
-	{ "input": [3, 3, 3, 3], "output": 10, "count": 1 },
-	# Ván + Que -> 1 Cuốc gỗ (Ván trên, Que dưới)
-	{ "input": [3, 0, 9, 0], "output": 11, "count": 1 },
-	{ "input": [0, 3, 0, 9], "output": 11, "count": 1 },
-	# Đá + Que -> 1 Cuốc đá (Đá trên, Que dưới)
-	{ "input": [7, 0, 9, 0], "output": 6, "count": 1 },
-	{ "input": [0, 7, 0, 9], "output": 6, "count": 1 }
-]
-
 func check_crafting():
-	var c = []
-	for i in range(36, 40): c.append(inv_data[i].id)
+	var grid = []
+	var columns = 3 if is_crafting_table_open else 2
+	var max_idx = 44 if is_crafting_table_open else 39
+	for i in range(36, max_idx + 1):
+		grid.append(inv_data[i].id)
 	
-	var r_id = 0
-	var r_count = 0
-	
-	for recipe in crafting_recipes:
-		var match_all = true
-		for i in range(4):
-			if c[i] != recipe["input"][i]:
-				match_all = false
-				break
-		if match_all:
-			r_id = recipe["output"]
-			r_count = recipe["count"]
-			break
-			
-	# Update ô 40 nhưng không gọi lại check_crafting (tránh lặp vô hạn)
-	inv_data[40].id = r_id
-	inv_data[40].count = r_count
-	inv_slots[40].update_item(r_id, r_count)
+	var res = DataManager.get_recipe_output(grid, columns)
+	if res.is_empty():
+		inv_data[45].id = 0
+		inv_data[45].count = 0
+		if inv_slots[45]: inv_slots[45].update_item(0, 0)
+	else:
+		inv_data[45].id = res["id"]
+		inv_data[45].count = res["count"]
+		if inv_slots[45]: inv_slots[45].update_item(res["id"], res["count"])
 
 func add_item(id: int, count: int) -> int:
 	var remain = count
@@ -323,16 +307,19 @@ func on_slot_clicked(idx: int, button: int):
 	var h_id = held_item.id
 	var h_count = held_item.count
 	
-	if idx == 40: # Ô Result
+	if idx == 45: # Ô Result
 		if s_id != 0:
 			if h_id == 0 or (h_id == s_id and h_count + s_count <= 64):
 				# Lấy đồ
 				held_item.id = s_id
 				held_item.count = h_count + s_count
 				# Giảm nguyên liệu
-				for i in range(36, 40):
+				var max_idx = 44 if is_crafting_table_open else 39
+				for i in range(36, max_idx + 1):
 					if inv_data[i].count > 0:
-						update_slot(i, inv_data[i].id, inv_data[i].count - 1)
+						var next_count = inv_data[i].count - 1
+						var next_id = inv_data[i].id if next_count > 0 else 0
+						update_slot(i, next_id, next_count)
 				update_cursor()
 		return
 		
@@ -389,8 +376,23 @@ func update_cursor():
 		held_item.id = 0
 		held_item.count = 0
 
-func toggle_inventory():
+func toggle_inventory(is_table: bool = false):
+	is_crafting_table_open = is_table
+	if is_table:
+		craft_grid.columns = 3
+		for i in range(36, 45):
+			inv_slots[i].visible = true
+	else:
+		craft_grid.columns = 2
+		for i in range(36, 40): inv_slots[i].visible = true
+		for i in range(40, 45):
+			inv_slots[i].visible = false
+			# Vứt vật phẩm ở các ô bị ẩn ra ngoài (chưa implement entity drop, tạm xóa)
+			if inv_data[i].id > 0:
+				update_slot(i, 0, 0)
+	
 	inventory_overlay.visible = !inventory_overlay.visible
+	check_crafting()
 	if inventory_overlay.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	else:

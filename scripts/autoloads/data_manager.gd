@@ -2,6 +2,7 @@ extends Node
 
 var blocks_data = {}
 var tool_tiers = {}
+var recipes = []
 
 # Ánh xạ từ Integer ID sang String ID
 var int_to_string_id = {
@@ -54,6 +55,8 @@ func load_recipes_and_tools():
 			var data = json.get_data()
 			if data.has("tool_tier_reference"):
 				tool_tiers = data["tool_tier_reference"]
+			if data.has("recipes"):
+				recipes = data["recipes"]
 		else:
 			push_error("Lỗi phân tích cú pháp crafting_recipes.json")
 	else:
@@ -139,3 +142,79 @@ func get_drops(block_id: int, tool_id: int) -> Array:
 				result.append({"id": out_id, "count": count})
 				
 	return result
+
+func get_recipe_output(grid_array: Array, columns: int) -> Dictionary:
+	var rows = grid_array.size() / columns
+	var min_c = columns; var max_c = -1
+	var min_r = rows; var max_r = -1
+	var items_count = {}
+	var has_items = false
+	
+	for r in range(rows):
+		for c in range(columns):
+			var id = grid_array[r * columns + c]
+			if id > 0:
+				has_items = true
+				if c < min_c: min_c = c
+				if c > max_c: max_c = c
+				if r < min_r: min_r = r
+				if r > max_r: max_r = r
+				items_count[id] = items_count.get(id, 0) + 1
+				
+	if not has_items: return {}
+	
+	# Bounding Box
+	var w = max_c - min_c + 1
+	var h = max_r - min_r + 1
+	var b_box = []
+	for r in range(h):
+		var row_arr = []
+		for c in range(w):
+			row_arr.append(grid_array[(min_r + r) * columns + (min_c + c)])
+		b_box.append(row_arr)
+
+	for r_data in recipes:
+		# Bỏ qua nung (smelting)
+		if r_data.has("type") and r_data["type"] == "smelting": continue
+		
+		var grid_req = r_data.get("grid", "no_table")
+		if grid_req == "crafting_table" and columns < 3: continue
+		
+		var is_shapeless = r_data.get("shapeless", false)
+		if is_shapeless:
+			var ingredients = r_data.get("ingredients", [])
+			var req_count = {}
+			for ing in ingredients:
+				var ing_id = get_item_int_id(ing.get("item", ""))
+				req_count[ing_id] = req_count.get(ing_id, 0) + ing.get("count", 1)
+			
+			var match_all = true
+			if req_count.size() != items_count.size(): match_all = false
+			else:
+				for k in req_count.keys():
+					if not items_count.has(k) or items_count[k] != req_count[k]:
+						match_all = false
+						break
+			if match_all:
+				return {"id": get_item_int_id(r_data["output"]["item"]), "count": r_data["output"]["count"]}
+		else:
+			var shape = r_data.get("shape", [])
+			var sh_h = shape.size()
+			var sh_w = 0 if sh_h == 0 else shape[0].size()
+			
+			if h != sh_h or w != sh_w: continue
+			
+			var match_all = true
+			for r in range(sh_h):
+				for c in range(sh_w):
+					var str_item = shape[r][c]
+					var req_id = 0
+					if str_item != null: req_id = get_item_int_id(str_item)
+					if b_box[r][c] != req_id:
+						match_all = false
+						break
+				if not match_all: break
+				
+			if match_all:
+				return {"id": get_item_int_id(r_data["output"]["item"]), "count": r_data["output"]["count"]}
+	return {}

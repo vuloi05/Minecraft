@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cpqwhhm2p3mv7"
-path="res://.godot/imported/Stone_Pickaxe_JE2_BE2.png-431df6181cfb4ac7d7e2154de5675e9a.ctex"
+path="res://.godot/imported/Stone_Pickaxe_JE2_BE2.png-e24902640e71a65e6df845f238523921.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Stone_Pickaxe_JE2_BE2.png"
-dest_files=["res://.godot/imported/Stone_Pickaxe_JE2_BE2.png-431df6181cfb4ac7d7e2154de5675e9a.ctex"]
+source_file="res://assets/textures/items/Stone_Pickaxe_JE2_BE2.png"
+dest_files=["res://.godot/imported/Stone_Pickaxe_JE2_BE2.png-e24902640e71a65e6df845f238523921.ctex"]
 
 [params]
 
