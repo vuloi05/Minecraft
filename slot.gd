@@ -50,9 +50,26 @@ func update_item(id: int, count: int):
 		count_label.text = ""
 		item_id = 0
 		item_count = 0
+		tooltip_text = ""
 	else:
 		label.text = get_icon(id)
 		count_label.text = str(count) if count > 1 else ""
+		tooltip_text = get_item_name(id)
+
+func get_item_name(id: int) -> String:
+	match id:
+		1: return "Cỏ"
+		2: return "Khúc Gỗ"
+		3: return "Ván Gỗ"
+		4: return "Lá Cây"
+		5: return "Đuốc"
+		6: return "Cúp Đá"
+		7: return "Đá"
+		8: return "Đất"
+		9: return "Que"
+		10: return "Bàn Chế Tạo"
+		11: return "Cúp Gỗ"
+	return "Unknown"
 
 func get_icon(id: int) -> String:
 	match id:
@@ -61,9 +78,12 @@ func get_icon(id: int) -> String:
 		3: return "🟫" # Ván
 		4: return "🌿" # Lá
 		5: return "🔦" # Đuốc
-		6: return "⛏️" # Cuốc chim
+		6: return "⛏️" # Cuốc chim (Đá)
 		7: return "🪨" # Đá
 		8: return "🟫" # Đất
+		9: return "🦯" # Que
+		10: return "🧰" # Bàn chế tạo
+		11: return "🪓" # Cuốc gỗ
 	return ""
 
 # --- DRAG AND DROP ---

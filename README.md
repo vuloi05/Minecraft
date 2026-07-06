@@ -19,10 +19,18 @@
 - **Wireframe Highlight:** Khối đang được ngắm trúng sẽ hiện viền trắng mỏng xung quanh, giúp người chơi dễ định vị điểm đặt.
 - Tối ưu hóa: Chỉ các bề mặt lộ ra ngoài (Exposed Faces) mới được Engine render (thuật toán Greedy Meshing cơ bản), giúp game đạt FPS rất cao.
 
-### 4. Hệ Thống Giao Diện & Túi Đồ (UI/Inventory)
-- **Thanh Hotbar:** Thanh công cụ 9 ô ở cạnh dưới màn hình, hiển thị icon và số lượng vật phẩm.
-- **Thao tác nhanh:** Có thể dùng con lăn chuột (Scroll) hoặc phím số (1-9) để chọn nhanh vật phẩm.
-- **Màn hình Loading chờ:** Tích hợp thanh tiến trình tải bản đồ (Progress Bar) căn giữa màn hình tuyệt đẹp, tránh việc người chơi bị rớt xuống khoảng không khi map chưa load xong.
+### 4. Hệ Thống Giao Diện & Túi Đồ (UI/Inventory/Crafting)
+- **Túi Đồ Hoàn Chỉnh (Full Inventory):** Nhấn phím `E` hoặc `TAB` để mở màn hình quản lý hành trang.
+  - Bao gồm 27 ô chứa đồ dự trữ (Main Inventory) và 9 ô thao tác nhanh (Hotbar).
+  - Tích hợp sẵn lưới **Crafting 2x2** bên trong túi đồ để chế tạo nhanh (gỗ ra ván, ván ra que, chế tạo cuốc chim).
+  - Hệ thống dữ liệu Crafting được xây dựng chuẩn mực bằng cơ chế **Dictionary (Data-driven)** độc lập và dễ dàng mở rộng.
+- **Kéo Thả (Drag & Drop):** Hỗ trợ thao tác kéo thả mượt mà giữa các ô đồ. Đặc biệt hỗ trợ **Chuột phải** để chia đôi số lượng vật phẩm (Split stack) hệt như Minecraft thật.
+- **Tooltip Hiện Đại:** Tự động hiển thị tên vật phẩm khi bạn di chuột qua các icon trong Inventory.
+- **Thanh Hotbar & Trạng Thái:**
+  - Thanh công cụ 9 ô ở cạnh dưới màn hình, hiển thị icon và số lượng vật phẩm.
+  - Có thể dùng con lăn chuột (Scroll) hoặc phím số (1-9) để chọn nhanh.
+  - Thanh sinh tồn hiển thị theo thời gian thực: **Máu (Tim ♥)** và **Đói (Thịt 🍖)**.
+- **Màn hình Loading chờ:** Tích hợp thanh tiến trình tải bản đồ tuyệt đẹp, tránh rơi tự do khi map chưa load.
 
 ### 5. Đồ Họa & Ánh Sáng (Graphics & Lighting)
 - **Đồ họa Pixel Art:** Áp dụng bộ lọc `TEXTURE_FILTER_NEAREST` lên toàn bộ thế giới để giữ được sự sắc sảo, vỡ hạt đặc trưng của các khối Voxel.

@@ -175,6 +175,25 @@ func update_slot(idx: int, id: int, count: int):
 	if idx >= 36 and idx <= 39:
 		check_crafting()
 
+var crafting_recipes = [
+	# Gỗ -> 4 Ván (có thể đặt ở 4 góc)
+	{ "input": [2, 0, 0, 0], "output": 3, "count": 4 },
+	{ "input": [0, 2, 0, 0], "output": 3, "count": 4 },
+	{ "input": [0, 0, 2, 0], "output": 3, "count": 4 },
+	{ "input": [0, 0, 0, 2], "output": 3, "count": 4 },
+	# 2 Ván (dọc) -> 4 Que
+	{ "input": [3, 0, 3, 0], "output": 9, "count": 4 },
+	{ "input": [0, 3, 0, 3], "output": 9, "count": 4 },
+	# 4 Ván -> 1 Bàn chế tạo
+	{ "input": [3, 3, 3, 3], "output": 10, "count": 1 },
+	# Ván + Que -> 1 Cuốc gỗ (Ván trên, Que dưới)
+	{ "input": [3, 0, 9, 0], "output": 11, "count": 1 },
+	{ "input": [0, 3, 0, 9], "output": 11, "count": 1 },
+	# Đá + Que -> 1 Cuốc đá (Đá trên, Que dưới)
+	{ "input": [7, 0, 9, 0], "output": 6, "count": 1 },
+	{ "input": [0, 7, 0, 9], "output": 6, "count": 1 }
+]
+
 func check_crafting():
 	var c = []
 	for i in range(36, 40): c.append(inv_data[i].id)
@@ -182,18 +201,16 @@ func check_crafting():
 	var r_id = 0
 	var r_count = 0
 	
-	var woods = c.count(2)
-	var planks = c.count(3)
-	var empty = c.count(0)
-	
-	if woods == 1 and empty == 3: # Gỗ -> 4 Ván
-		r_id = 3
-		r_count = 4
-	elif planks == 2 and empty == 2:
-		# Check nếu ván xếp dọc (VD: 36, 38 hoặc 37, 39)
-		if (c[0]==3 and c[2]==3) or (c[1]==3 and c[3]==3):
-			r_id = 6 # Tạm dùng gậy/cuốc là 6 (Cuốc gỗ)
-			r_count = 1
+	for recipe in crafting_recipes:
+		var match_all = true
+		for i in range(4):
+			if c[i] != recipe["input"][i]:
+				match_all = false
+				break
+		if match_all:
+			r_id = recipe["output"]
+			r_count = recipe["count"]
+			break
 			
 	# Update ô 40 nhưng không gọi lại check_crafting (tránh lặp vô hạn)
 	inv_data[40].id = r_id
