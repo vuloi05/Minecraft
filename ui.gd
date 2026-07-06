@@ -8,6 +8,7 @@ var hud: Control
 var loading_panel: ColorRect
 var loading_label: Label
 
+var inventory_overlay: ColorRect
 var inventory_panel: Panel
 var inv_data = [] # Mảng 41 ô đồ {id, count}
 var inv_slots = [] # Các ô UI trong túi đồ
@@ -83,9 +84,19 @@ func _ready():
 	hud.add_child(mine_progress)
 	
 	# --- MÀN HÌNH TÚI ĐỒ (INVENTORY) ---
+	inventory_overlay = ColorRect.new()
+	inventory_overlay.color = Color(0, 0, 0, 0.5) # Làm tối màn hình đằng sau
+	inventory_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	inventory_overlay.visible = false
+	$Control.add_child(inventory_overlay)
+	
+	var center_container = CenterContainer.new()
+	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	inventory_overlay.add_child(center_container)
+	
 	inventory_panel = Panel.new()
 	inventory_panel.custom_minimum_size = Vector2(500, 480)
-	inventory_panel.set_anchors_preset(Control.PRESET_CENTER)
+	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color("#C6C6C6")
 	style.border_width_left = 4
@@ -94,8 +105,7 @@ func _ready():
 	style.border_width_bottom = 4
 	style.border_color = Color("#373737")
 	inventory_panel.add_theme_stylebox_override("panel", style)
-	inventory_panel.visible = false
-	$Control.add_child(inventory_panel)
+	center_container.add_child(inventory_panel)
 	
 	var inv_vbox = VBoxContainer.new()
 	inv_vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -104,11 +114,6 @@ func _ready():
 	inventory_panel.add_child(inv_vbox)
 	
 	# Phần trên: Chế tạo
-	var craft_label = Label.new()
-	craft_label.text = "Crafting"
-	craft_label.add_theme_color_override("font_color", Color(0.2, 0.2, 0.2))
-	inv_vbox.add_child(craft_label)
-	
 	var top_hbox = HBoxContainer.new()
 	top_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	top_hbox.add_theme_constant_override("separation", 30)
@@ -359,8 +364,8 @@ func update_cursor():
 		held_item.count = 0
 
 func toggle_inventory():
-	inventory_panel.visible = !inventory_panel.visible
-	if inventory_panel.visible:
+	inventory_overlay.visible = !inventory_overlay.visible
+	if inventory_overlay.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	else:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
