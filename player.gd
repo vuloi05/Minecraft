@@ -234,6 +234,18 @@ func take_damage(amount: int):
 func _physics_process(delta):
 	if is_loading: return
 	
+	# Đóng băng (Freeze) người chơi nếu Chunk đang đứng chưa có lưới 3D
+	# Phòng trường hợp người chơi rơi lọt thỏm xuống hư không
+	if world_node:
+		var px = global_position.x
+		var pz = global_position.z
+		var cpos = Vector2i(floor(px / 16.0), floor(pz / 16.0))
+		var chunk = world_node.get_chunk_safe(cpos)
+		if not chunk or not chunk.is_mesh_ready:
+			velocity = Vector3.ZERO
+			move_and_slide()
+			return
+	
 	# Cập nhật hiển thị tay cầm
 	var id = 0
 	if ui: id = ui.get_selected_item_id()
