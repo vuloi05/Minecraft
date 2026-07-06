@@ -367,26 +367,23 @@ func _physics_process(delta):
 				mine_timer = 0.0
 				
 			var block_id = world_node.get_block_global(grid_pos.x, grid_pos.y, grid_pos.z)
-			var req_time = 3.0 # Tay không đập đá 3s
-			if block_id in [1, 8]: req_time = 1.0 # Cỏ, Đất 1s
-			if block_id in [2, 4]: req_time = 1.5 # Gỗ và lá 1.5s
-			
 			var selected_item = 0
 			if ui: selected_item = ui.get_selected_item_id()
-			if selected_item == 6 and block_id == 7: req_time = 0.5 # Có cuốc đập đá 0.5s
 			
-			if ui: ui.update_mining_ui(mine_timer, req_time)
+			var req_time = DataManager.get_mining_time(block_id, selected_item)
 			
-			if mine_timer >= req_time:
-				world_node.set_block(grid_pos, 0)
+			# Nếu req_time < 0 (Bedrock), không cho phép đào
+			if req_time >= 0:
+				if ui: ui.update_mining_ui(mine_timer, req_time)
 				
-				# Rớt đồ
-				var drop_id = block_id
-				if block_id == 1: drop_id = 8 # Cỏ rớt ra Đất
-				elif block_id == 4: drop_id = 2 # Lá rớt ra Gỗ
-				
-				if ui and drop_id > 0:
-					ui.add_item(drop_id, 1)
+				if mine_timer >= req_time:
+					world_node.set_block(grid_pos, 0)
+					
+					# Rớt đồ qua DataManager
+					if ui:
+						var drops = DataManager.get_drops(block_id, selected_item)
+						for d in drops:
+							ui.add_item(d.id, d.count)
 				
 				mine_timer = 0.0
 				if ui: ui.update_mining_ui(0, 1)

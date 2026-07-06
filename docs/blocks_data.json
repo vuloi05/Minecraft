@@ -1,0 +1,327 @@
+{
+    "_meta": {
+        "description": "Dữ liệu block cơ bản cho dự án Minecraft Clone (Singleplayer). Các con số hardness/tool/drop là dữ kiện luật chơi (game mechanics facts), được tổng hợp lại theo cấu trúc riêng cho dự án, không sao chép văn bản từ bất kỳ nguồn nào.",
+        "formula_break_time": "Thời gian đào (giây) ≈ hardness x hệ số theo tool_tier_required (xem tool_tier_reference trong crafting_recipes.json). Nếu không đủ tool_tier yêu cầu -> không rơi vật phẩm (trừ khi ghi chú khác), nhưng vẫn đào được (chậm hơn nhiều).",
+        "tool_tier_scale": {
+            "0": "Tay không / công cụ không phù hợp",
+            "1": "Gỗ trở lên",
+            "2": "Đá trở lên",
+            "3": "Sắt trở lên",
+            "4": "Kim cương trở lên"
+        }
+    },
+    "blocks": [
+        {
+            "id": "dirt",
+            "display_name": "Đất",
+            "hardness": 0.5,
+            "best_tool": "shovel",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "dirt",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Không cần công cụ để rơi vật phẩm, xẻng chỉ giúp đào nhanh hơn."
+        },
+        {
+            "id": "grass_block",
+            "display_name": "Khối Cỏ",
+            "hardness": 0.6,
+            "best_tool": "shovel",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "dirt",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Đào ra Đất, không rơi ra chính nó (trừ khi có công cụ Silk Touch nếu sau này bổ sung enchant)."
+        },
+        {
+            "id": "stone",
+            "display_name": "Đá",
+            "hardness": 1.5,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 1,
+            "drops": [
+                {
+                    "item": "cobblestone",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Bắt buộc cần cuốc (tier gỗ trở lên) mới rơi vật phẩm. Không có cuốc -> không rơi gì cả."
+        },
+        {
+            "id": "cobblestone",
+            "display_name": "Đá Cuội",
+            "hardness": 2.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 1,
+            "drops": [
+                {
+                    "item": "cobblestone",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false
+        },
+        {
+            "id": "oak_log",
+            "display_name": "Gỗ Sồi (Log)",
+            "hardness": 2.0,
+            "best_tool": "axe",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "oak_log",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true,
+            "note": "Không bắt buộc cần rìu để rơi vật phẩm, rìu chỉ giúp chặt nhanh hơn."
+        },
+        {
+            "id": "oak_planks",
+            "display_name": "Ván Gỗ Sồi",
+            "hardness": 2.0,
+            "best_tool": "axe",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "oak_planks",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true
+        },
+        {
+            "id": "oak_leaves",
+            "display_name": "Lá Cây Sồi",
+            "hardness": 0.2,
+            "best_tool": "shears",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "stick",
+                    "count": 1,
+                    "chance": 0.02
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true,
+            "note": "Đào bằng tool thường: xác suất nhỏ rơi ra que hoặc quả táo (nếu là oak). Đào bằng kéo (shears): rơi ra chính lá."
+        },
+        {
+            "id": "sand",
+            "display_name": "Cát",
+            "hardness": 0.5,
+            "best_tool": "shovel",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "sand",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": true,
+            "flammable": false,
+            "note": "Chịu ảnh hưởng trọng lực: nếu khối bên dưới bị phá, khối cát sẽ rơi xuống."
+        },
+        {
+            "id": "gravel",
+            "display_name": "Sỏi",
+            "hardness": 0.6,
+            "best_tool": "shovel",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "gravel",
+                    "count": 1,
+                    "chance": 0.9
+                },
+                {
+                    "item": "flint",
+                    "count": 1,
+                    "chance": 0.1
+                }
+            ],
+            "gravity_affected": true,
+            "flammable": false
+        },
+        {
+            "id": "coal_ore",
+            "display_name": "Quặng Than",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 1,
+            "drops": [
+                {
+                    "item": "coal",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "spawn_depth_hint": "Phổ biến ở độ cao trung bình tới gần bề mặt, phổ biến nhất trong các loại quặng."
+        },
+        {
+            "id": "iron_ore",
+            "display_name": "Quặng Sắt",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 2,
+            "drops": [
+                {
+                    "item": "raw_iron",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Cần cuốc đá trở lên mới rơi vật phẩm. Quặng thô (raw_iron) phải nung ở Lò nung mới ra thỏi sắt."
+        },
+        {
+            "id": "gold_ore",
+            "display_name": "Quặng Vàng",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 2,
+            "drops": [
+                {
+                    "item": "raw_gold",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false
+        },
+        {
+            "id": "diamond_ore",
+            "display_name": "Quặng Kim Cương",
+            "hardness": 3.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 3,
+            "drops": [
+                {
+                    "item": "diamond",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Cần cuốc sắt trở lên. Thường sinh ở độ sâu gần đáy bản đồ."
+        },
+        {
+            "id": "obsidian",
+            "display_name": "Obsidian",
+            "hardness": 50.0,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 4,
+            "drops": [
+                {
+                    "item": "obsidian",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Cần cuốc kim cương trở lên, độ cứng rất cao -> đào lâu nếu dùng tool yếu (hoặc coi như không đào được nếu chưa có tier 4)."
+        },
+        {
+            "id": "bedrock",
+            "display_name": "Đá Nền",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 99,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "hardness = -1 nghĩa là không thể phá hủy trong Survival, dùng làm lớp đáy thế giới."
+        },
+        {
+            "id": "glass",
+            "display_name": "Kính",
+            "hardness": 0.3,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "note": "Đào bằng tool thường sẽ vỡ và không rơi vật phẩm gì (giống bản gốc), trừ khi có Silk Touch."
+        },
+        {
+            "id": "crafting_table",
+            "display_name": "Bàn Chế Tạo",
+            "hardness": 2.5,
+            "best_tool": "axe",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "crafting_table",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true
+        },
+        {
+            "id": "furnace",
+            "display_name": "Lò Nung",
+            "hardness": 3.5,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 1,
+            "drops": [
+                {
+                    "item": "furnace",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false
+        },
+        {
+            "id": "chest",
+            "display_name": "Rương",
+            "hardness": 2.5,
+            "best_tool": "axe",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "chest",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true,
+            "note": "Nếu có item bên trong khi đào, cần logic rơi hết item ra ngoài (drop as entity)."
+        },
+        {
+            "id": "torch",
+            "display_name": "Đuốc",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "torch",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "light_level": 14,
+            "note": "hardness = 0 nghĩa là đào tức thời (instant break). Đuốc là block phát sáng, dùng light_level cho hệ thống lan truyền ánh sáng."
+        }
+    ]
+}

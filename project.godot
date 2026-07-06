@@ -14,6 +14,10 @@ config/name="Minecraft Clone"
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 
+[autoload]
+
+DataManager="*res://scripts/autoloads/data_manager.gd"
+
 [dotnet]
 
 project/assembly_name="Minecraft Clone"

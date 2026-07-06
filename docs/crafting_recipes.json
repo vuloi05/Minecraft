@@ -1,0 +1,484 @@
+{
+    "_meta": {
+        "description": "Dữ liệu công thức chế tạo cơ bản cho dự án Minecraft Clone (Singleplayer). Đây là dữ kiện luật chơi (số lượng, nguyên liệu, kết quả), không phải nội dung sao chép từ bất kỳ nguồn nào. Dùng làm input cho hệ thống Crafting trong Giai đoạn C.",
+        "grid_types": {
+            "no_table": "Lưới 2x2, mở trực tiếp khi mở Inventory, không cần đặt block",
+            "crafting_table": "Lưới 3x3, cần click phải vào block Crafting Table để mở"
+        },
+        "shape_notation": "shape: mảng 2D biểu diễn vị trí nguyên liệu trong lưới, null = ô trống, dùng item_id. shapeless: true nghĩa là không quan tâm vị trí, chỉ cần đủ số lượng."
+    },
+    "recipes": [
+        {
+            "id": "planks_from_log",
+            "output": {
+                "item": "oak_planks",
+                "count": 4
+            },
+            "grid": "no_table",
+            "shapeless": true,
+            "ingredients": [
+                {
+                    "item": "oak_log",
+                    "count": 1
+                }
+            ],
+            "note": "1 khối gỗ (log) bất kỳ loại cây -> 4 ván. Áp dụng tương tự cho các loại gỗ khác nếu sau này thêm nhiều loại cây."
+        },
+        {
+            "id": "stick",
+            "output": {
+                "item": "stick",
+                "count": 4
+            },
+            "grid": "no_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks"
+                ],
+                [
+                    "oak_planks"
+                ]
+            ],
+            "note": "2 ván xếp chồng dọc -> 4 que."
+        },
+        {
+            "id": "crafting_table",
+            "output": {
+                "item": "crafting_table",
+                "count": 1
+            },
+            "grid": "no_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks",
+                    "oak_planks"
+                ],
+                [
+                    "oak_planks",
+                    "oak_planks"
+                ]
+            ],
+            "note": "4 ván xếp vuông 2x2 -> 1 Bàn chế tạo."
+        },
+        {
+            "id": "furnace",
+            "output": {
+                "item": "furnace",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "cobblestone",
+                    "cobblestone",
+                    "cobblestone"
+                ],
+                [
+                    "cobblestone",
+                    null,
+                    "cobblestone"
+                ],
+                [
+                    "cobblestone",
+                    "cobblestone",
+                    "cobblestone"
+                ]
+            ],
+            "note": "8 đá cuội (cobblestone) xếp viền quanh, ô giữa trống -> 1 Lò nung."
+        },
+        {
+            "id": "torch",
+            "output": {
+                "item": "torch",
+                "count": 4
+            },
+            "grid": "no_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "coal"
+                ],
+                [
+                    "stick"
+                ]
+            ],
+            "note": "1 than + 1 que (than trên, que dưới) -> 4 đuốc. Có thể dùng charcoal (than củi) thay thế coal."
+        },
+        {
+            "id": "chest",
+            "output": {
+                "item": "chest",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks",
+                    "oak_planks",
+                    "oak_planks"
+                ],
+                [
+                    "oak_planks",
+                    null,
+                    "oak_planks"
+                ],
+                [
+                    "oak_planks",
+                    "oak_planks",
+                    "oak_planks"
+                ]
+            ],
+            "note": "8 ván xếp viền quanh -> 1 Rương lưu trữ."
+        },
+        {
+            "id": "wooden_pickaxe",
+            "output": {
+                "item": "wooden_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks",
+                    "oak_planks",
+                    "oak_planks"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "tool_tier": 1,
+            "note": "Cuốc gỗ. Đào được đá (cobblestone), không đào được quặng sắt trở lên."
+        },
+        {
+            "id": "wooden_axe",
+            "output": {
+                "item": "wooden_axe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks",
+                    "oak_planks"
+                ],
+                [
+                    "oak_planks",
+                    "stick"
+                ],
+                [
+                    null,
+                    "stick"
+                ]
+            ],
+            "note": "Rìu gỗ. Chặt gỗ nhanh hơn tay không."
+        },
+        {
+            "id": "wooden_shovel",
+            "output": {
+                "item": "wooden_shovel",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "oak_planks",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "Xẻng gỗ. Đào đất/cát/sỏi nhanh hơn."
+        },
+        {
+            "id": "wooden_sword",
+            "output": {
+                "item": "wooden_sword",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "oak_planks",
+                    null
+                ],
+                [
+                    null,
+                    "oak_planks",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "Kiếm gỗ. Sát thương thấp nhất trong các loại kiếm."
+        },
+        {
+            "id": "stone_pickaxe",
+            "output": {
+                "item": "stone_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "cobblestone",
+                    "cobblestone",
+                    "cobblestone"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "tool_tier": 2,
+            "note": "Cuốc đá. Đào được quặng sắt, không đào được quặng kim cương/obsidian."
+        },
+        {
+            "id": "stone_axe",
+            "output": {
+                "item": "stone_axe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "cobblestone",
+                    "cobblestone"
+                ],
+                [
+                    "cobblestone",
+                    "stick"
+                ],
+                [
+                    null,
+                    "stick"
+                ]
+            ],
+            "note": "Rìu đá."
+        },
+        {
+            "id": "stone_shovel",
+            "output": {
+                "item": "stone_shovel",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "cobblestone",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "Xẻng đá."
+        },
+        {
+            "id": "stone_sword",
+            "output": {
+                "item": "stone_sword",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "cobblestone",
+                    null
+                ],
+                [
+                    null,
+                    "cobblestone",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "Kiếm đá."
+        },
+        {
+            "id": "iron_ingot_from_smelting",
+            "type": "smelting",
+            "output": {
+                "item": "iron_ingot",
+                "count": 1
+            },
+            "input": {
+                "item": "raw_iron",
+                "count": 1
+            },
+            "fuel_examples": [
+                "coal",
+                "charcoal",
+                "oak_planks (yếu, cháy nhanh hết)"
+            ],
+            "smelt_time_seconds": 10,
+            "note": "Nung quặng sắt thô trong Lò nung -> Thỏi sắt. Không phải công thức ghép trong bàn chế tạo, mà là quy trình nung (cần fuel + slot input riêng)."
+        },
+        {
+            "id": "iron_pickaxe",
+            "output": {
+                "item": "iron_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "iron_ingot",
+                    "iron_ingot",
+                    "iron_ingot"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "tool_tier": 3,
+            "note": "Cuốc sắt. Đào được quặng kim cương, obsidian (chậm hơn kim cương)."
+        },
+        {
+            "id": "iron_sword",
+            "output": {
+                "item": "iron_sword",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    null,
+                    "iron_ingot",
+                    null
+                ],
+                [
+                    null,
+                    "iron_ingot",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "Kiếm sắt."
+        },
+        {
+            "id": "bread",
+            "output": {
+                "item": "bread",
+                "count": 1
+            },
+            "grid": "no_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "wheat",
+                    "wheat",
+                    "wheat"
+                ]
+            ],
+            "hunger_restore": 5,
+            "note": "3 lúa mì xếp ngang -> 1 bánh mì. Phục hồi độ đói."
+        }
+    ],
+    "tool_tier_reference": {
+        "_note": "Bảng tham chiếu độ cứng/tốc độ đào theo tier, dùng cho logic tính thời gian đào block trong Giai đoạn 4.4",
+        "0_hand": {
+            "mines": [
+                "dirt",
+                "sand",
+                "gravel",
+                "wood_soft"
+            ],
+            "speed_multiplier": 1.0
+        },
+        "1_wood": {
+            "mines": [
+                "stone",
+                "coal_ore",
+                "copper_ore"
+            ],
+            "speed_multiplier": 2.0
+        },
+        "2_stone": {
+            "mines": [
+                "iron_ore",
+                "gold_ore"
+            ],
+            "speed_multiplier": 4.0
+        },
+        "3_iron": {
+            "mines": [
+                "diamond_ore",
+                "redstone_ore",
+                "obsidian_slow"
+            ],
+            "speed_multiplier": 6.0
+        },
+        "4_diamond": {
+            "mines": [
+                "obsidian_fast",
+                "ancient_debris"
+            ],
+            "speed_multiplier": 8.0
+        }
+    }
+}
