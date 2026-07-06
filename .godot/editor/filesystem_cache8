@@ -1,11 +1,11 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1783261110
+::res://::1783324322
 Block.tscn::PackedScene::139818410733878908::1783223613::0::1::::<><>::
-chunk.gd::GDScript::-1::1783261262::0::1::::Chunk<>Node3D<>::
+chunk.gd::GDScript::-1::1783261438::0::1::::Chunk<>Node3D<>::
 day_night.gd::GDScript::-1::1783236527::0::1::::<>DirectionalLight3D<>::
-Main.tscn::PackedScene::6441268711197394536::1783259984::0::1::::<><>::res://player.gd<>res://world.gd<>res://day_night.gd<>uid://cxabdef::::res://UI.tscn
+Main.tscn::PackedScene::6441268711197394536::1783262024::0::1::::<><>::res://player.gd<>res://world.gd<>res://day_night.gd<>uid://cxabdef::::res://UI.tscn
 pickaxe.png::CompressedTexture2D::2850706502280383916::1783234966::1783235252::0::::<><>::
-player.gd::GDScript::-1::1783261206::0::1::::<>CharacterBody3D<>::
+player.gd::GDScript::-1::1783261855::0::1::::<>CharacterBody3D<>::
 README.md::TextFile::-1::1783222722::0::1::::<><>::
 slot.gd::GDScript::-1::1783233824::0::1::::InventorySlot<>ColorRect<>::
 Stone_Pickaxe_JE2_BE2.png::CompressedTexture2D::5860052727868861386::1783235123::1783235252::1::::<><>::
@@ -14,6 +14,6 @@ Torch.webp::CompressedTexture2D::5999110837173000653::1783260957::1783261407::0:
 Torch_%28texture%29_JE3_BE2.webp::CompressedTexture2D::6070352646159005007::1783261022::1783261407::1::::<><>::
 ui.gd::GDScript::-1::1783234414::0::1::::<>CanvasLayer<>::
 UI.tscn::PackedScene::4134666497::1783230714::0::1::::<><>::res://ui.gd
-world.gd::GDScript::-1::1783261310::0::1::::<>Node3D<>::
+world.gd::GDScript::-1::1783261875::0::1::::<>Node3D<>::
 zombie.gd::GDScript::-1::1783230939::0::1::::Zombie<>CharacterBody3D<>::
 ::res://item/::1783261094
