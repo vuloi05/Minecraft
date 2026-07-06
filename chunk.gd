@@ -11,6 +11,10 @@ var is_data_ready = false
 var is_meshing = false
 var is_mesh_ready = false
 
+var task_id = -1
+var mesh_task_id = -1
+var is_marked_for_deletion = false
+
 var mesh_instance = MeshInstance3D.new()
 var static_body = StaticBody3D.new()
 
@@ -32,6 +36,22 @@ func _init(_pos: Vector2i, _noise: FastNoiseLite, _mat: StandardMaterial3D, _wor
 	static_body.add_to_group("blocks")
 	mesh_instance.material_override = _mat
 	# Không gọi generate_blocks() ở đây nữa, sẽ được gọi trong thread
+
+func schedule_free():
+	is_marked_for_deletion = true
+	visible = false # Ẩn đi để người chơi không thấy
+	
+func _process(_delta):
+	if is_marked_for_deletion:
+		var can_free = true
+		if task_id != -1 and not WorkerThreadPool.is_task_completed(task_id):
+			can_free = false
+		if mesh_task_id != -1 and not WorkerThreadPool.is_task_completed(mesh_task_id):
+			can_free = false
+			
+		if can_free:
+			queue_free()
+			set_process(false)
 
 func generate_blocks():
 	blocks.resize(CHUNK_SIZE_X)
@@ -144,6 +164,10 @@ func thread_update_mesh_logic(is_sync: bool):
 	var mesh = null
 	if has_blocks:
 		mesh = local_st.commit()
+		
+	if is_marked_for_deletion:
+		is_meshing = false
+		return
 		
 	if is_sync:
 		apply_mesh_and_collision(mesh, block_shapes)

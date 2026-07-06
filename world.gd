@@ -82,7 +82,7 @@ func _process(delta):
 					add_child(chunk)
 					
 					# Giao việc sinh khối và tạo Mesh cho WorkerThreadPool (Luồng ngầm)
-					WorkerThreadPool.add_task(chunk.thread_generate)
+					chunk.task_id = WorkerThreadPool.add_task(chunk.thread_generate)
 		# --- Xử lý sinh Zombie vào ban đêm ---
 		var sun = get_parent().get_node_or_null("DirectionalLight3D")
 		# Khi rotation.x của mặt trời nhỏ hơn 0 tức là nó đang chiếu từ dưới lên -> Ban đêm
@@ -152,7 +152,7 @@ func update_chunks(player_chunk: Vector2i):
 		var chunk = chunks[cpos]
 		chunks.erase(cpos)
 		chunks_mutex.unlock()
-		chunk.queue_free()
+		chunk.schedule_free()
 
 func update_neighbor_meshes_async(cpos: Vector2i):
 	var neighbors = [
@@ -168,7 +168,7 @@ func update_neighbor_meshes_async(cpos: Vector2i):
 			var c = chunks[npos]
 			if c.is_data_ready and not c.is_meshing:
 				c.is_meshing = true
-				WorkerThreadPool.add_task(c.thread_update_mesh)
+				c.mesh_task_id = WorkerThreadPool.add_task(c.thread_update_mesh)
 	chunks_mutex.unlock()
 
 func get_chunk_safe(pos: Vector2i) -> Chunk:

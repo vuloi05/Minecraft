@@ -37,6 +37,11 @@ var hit_time = 0.0
 @onready var raycast = $Camera3D/RayCast3D
 var world_node: Node3D
 
+var player_model_script = preload("res://player_model.gd")
+var player_model: Node3D
+var spring_arm: SpringArm3D
+var camera_mode = 0 # 0: First, 1: Third Back, 2: Third Front
+
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	world_node = get_parent().get_node("World")
@@ -56,6 +61,23 @@ func _ready():
 	hand_base = Node3D.new()
 	hand_base.position = Vector3(0.5, -0.4, -0.7)
 	camera.add_child(hand_base)
+	
+	# Khởi tạo Player Model (Steve)
+	player_model = player_model_script.new()
+	add_child(player_model)
+	
+	# Khởi tạo SpringArm3D cho Camera F5
+	spring_arm = SpringArm3D.new()
+	spring_arm.position = Vector3(0, 1.5, 0)
+	spring_arm.collision_mask = 1
+	spring_arm.add_excluded_object(self.get_rid())
+	add_child(spring_arm)
+	
+	remove_child(camera)
+	spring_arm.add_child(camera)
+	camera.position = Vector3.ZERO
+	
+	update_camera_mode()
 	
 	hand_label = Label3D.new()
 	hand_label.font_size = 150
@@ -154,8 +176,11 @@ func _unhandled_input(event):
 	if is_loading: return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * 0.005)
-		camera.rotate_x(-event.relative.y * 0.005)
-		camera.rotation.x = clamp(camera.rotation.x, -PI/2, PI/2)
+		if camera_mode == 2:
+			spring_arm.rotate_x(event.relative.y * 0.005)
+		else:
+			spring_arm.rotate_x(-event.relative.y * 0.005)
+		spring_arm.rotation.x = clamp(spring_arm.rotation.x, -PI/2, PI/2)
 	
 	if event is InputEventMouseButton and event.pressed:
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
@@ -221,6 +246,31 @@ func _unhandled_input(event):
 		# Chọn Hotbar 1-9
 		if event.keycode >= KEY_1 and event.keycode <= KEY_9:
 			if ui: ui.select_hotbar(event.keycode - KEY_1)
+			
+		# Phím F5 để đổi góc nhìn
+		if event.keycode == KEY_F5:
+			camera_mode = (camera_mode + 1) % 3
+			update_camera_mode()
+
+func update_camera_mode():
+	if camera_mode == 0:
+		spring_arm.spring_length = 0.0
+		spring_arm.rotation.y = 0
+		camera.rotation = Vector3.ZERO
+		player_model.set_visible_model(false)
+		hand_base.visible = true
+	elif camera_mode == 1:
+		spring_arm.spring_length = 4.0
+		spring_arm.rotation.y = 0
+		camera.rotation = Vector3.ZERO
+		player_model.set_visible_model(true)
+		hand_base.visible = false
+	elif camera_mode == 2:
+		spring_arm.spring_length = 4.0
+		spring_arm.rotation.y = PI
+		camera.rotation = Vector3(0, PI, 0)
+		player_model.set_visible_model(true)
+		hand_base.visible = false
 
 func take_damage(amount: int):
 	hp -= amount
@@ -364,6 +414,12 @@ func _physics_process(delta):
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
+
+	# Chạy Animation cho Mô hình
+	var is_mining = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
+	var head_rot_x = spring_arm.rotation.x
+	if camera_mode == 2: head_rot_x = -head_rot_x
+	player_model.animate(velocity, is_mining, head_rot_x, delta)
 
 	move_and_slide()
 
