@@ -8,6 +8,8 @@ const CHUNK_SIZE_Z = 16
 var chunk_pos: Vector2i
 var blocks = []
 var is_data_ready = false
+var is_meshing = false
+var is_mesh_ready = false
 
 var mesh_instance = MeshInstance3D.new()
 var static_body = StaticBody3D.new()
@@ -109,37 +111,20 @@ func get_collision_shape() -> CollisionShape3D:
 		return shape
 
 func update_chunk_mesh():
-	var local_st = SurfaceTool.new()
-	local_st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
-	active_collisions = 0
-	var has_blocks = false
-	var block_shapes = []
-	
-	for x in range(CHUNK_SIZE_X):
-		for y in range(CHUNK_SIZE_Y):
-			for z in range(CHUNK_SIZE_Z):
-				if blocks[x][y][z] > 0:
-					if is_block_exposed(x, y, z):
-						create_block_mesh(local_st, x, y, z)
-						block_shapes.append(Vector3(x, y, z))
-						has_blocks = true
-	
-	if has_blocks:
-		mesh_instance.mesh = local_st.commit()
-	else:
-		mesh_instance.mesh = null
-		
-	for i in range(block_shapes.size()):
-		var shape = get_collision_shape()
-		shape.position = block_shapes[i]
-		shape.disabled = false
-		
-	for i in range(block_shapes.size(), collision_pool.size()):
-		collision_pool[i].disabled = true
+	# Gọi đồng bộ trên Main Thread khi đập/đặt block
+	thread_update_mesh_logic(true)
 
 func thread_generate():
 	generate_blocks()
+	thread_update_mesh_logic(false)
+
+func thread_update_mesh():
+	# Gọi bất đồng bộ (Luồng ngầm) khi cần cập nhật hàng xóm
+	thread_update_mesh_logic(false)
+
+func thread_update_mesh_logic(is_sync: bool):
+	if not is_data_ready: return
+	is_meshing = true
 	
 	var local_st = SurfaceTool.new()
 	local_st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -160,9 +145,17 @@ func thread_generate():
 	if has_blocks:
 		mesh = local_st.commit()
 		
-	call_deferred("apply_mesh_and_collision", mesh, block_shapes)
+	if is_sync:
+		apply_mesh_and_collision(mesh, block_shapes)
+	else:
+		call_deferred("apply_mesh_and_collision", mesh, block_shapes)
 
 func apply_mesh_and_collision(mesh, block_shapes: Array):
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+		
+	is_meshing = false
+	
 	if mesh:
 		mesh_instance.mesh = mesh
 	else:
@@ -176,6 +169,8 @@ func apply_mesh_and_collision(mesh, block_shapes: Array):
 		
 	for i in range(block_shapes.size(), collision_pool.size()):
 		collision_pool[i].disabled = true
+		
+	is_mesh_ready = true
 		
 	if world_ref.has_method("on_chunk_generated"):
 		world_ref.on_chunk_generated(chunk_pos)

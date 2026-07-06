@@ -8,6 +8,9 @@ const RENDER_DISTANCE = 3
 var chunks = {} # Dictionary mapping Vector2i -> Chunk
 var chunks_mutex = Mutex.new() # Mutex để đồng bộ đa luồng khi đọc/ghi vào dictionary chunks
 
+const MAX_THREADS = 4
+var active_threads = 0
+
 var material = StandardMaterial3D.new()
 var noise = FastNoiseLite.new()
 var player: CharacterBody3D
@@ -52,8 +55,8 @@ func _process(delta):
 		var player_chunk = Vector2i(pcx, pcz)
 		update_chunks(player_chunk)
 		
-		# Xử lý hàng đợi sinh Chunk (1 Chunk mỗi Frame)
-		if chunk_queue.size() > 0:
+		# Xử lý hàng đợi sinh Chunk (Giới hạn task đồng thời)
+		if chunk_queue.size() > 0 and active_threads < MAX_THREADS:
 			# Sắp xếp ưu tiên sinh Chunk gần người chơi nhất trước
 			chunk_queue.sort_custom(func(a, b):
 				var da = abs(a.x - pcx) + abs(a.y - pcz)
@@ -73,6 +76,7 @@ func _process(delta):
 					
 					chunks_mutex.lock()
 					chunks[cpos] = chunk
+					active_threads += 1
 					chunks_mutex.unlock()
 					
 					add_child(chunk)
@@ -108,8 +112,12 @@ func spawn_zombie():
 	add_child(z)
 
 func on_chunk_generated(cpos: Vector2i):
-	# Callback từ chunk.gd khi luồng ngầm đã sinh Mesh xong
-	update_neighbor_meshes(cpos)
+	chunks_mutex.lock()
+	active_threads -= 1
+	chunks_mutex.unlock()
+	
+	# Gọi luồng ngầm update hàng xóm thay vì update đồng bộ trên Main Thread
+	update_neighbor_meshes_async(cpos)
 	
 	if is_initial_load:
 		loaded_initial_chunks += 1
@@ -146,16 +154,22 @@ func update_chunks(player_chunk: Vector2i):
 		chunks_mutex.unlock()
 		chunk.queue_free()
 
-func update_neighbor_meshes(cpos: Vector2i):
+func update_neighbor_meshes_async(cpos: Vector2i):
 	var neighbors = [
 		cpos + Vector2i(1, 0),
 		cpos + Vector2i(-1, 0),
 		cpos + Vector2i(0, 1),
 		cpos + Vector2i(0, -1)
 	]
+	
+	chunks_mutex.lock()
 	for npos in neighbors:
 		if chunks.has(npos):
-			chunks[npos].update_chunk_mesh()
+			var c = chunks[npos]
+			if c.is_data_ready and not c.is_meshing:
+				c.is_meshing = true
+				WorkerThreadPool.add_task(c.thread_update_mesh)
+	chunks_mutex.unlock()
 
 func get_chunk_safe(pos: Vector2i) -> Chunk:
 	chunks_mutex.lock()
@@ -176,7 +190,9 @@ func get_block_global(x: int, y: int, z: int) -> int:
 		var lz = z - (cz * CHUNK_SIZE_Z)
 		return c.blocks[lx][y][lz]
 	
-	return 0
+	# Xử lý Race Condition: Nếu Chunk hàng xóm chưa sinh data xong, 
+	# ta coi như nó là đá đặc (trả về 7) để tạm thời che đi mặt giáp ranh, không bị thủng lưới
+	return 7
 
 func set_block(global_pos: Vector3, block_type: int):
 	var x = int(round(global_pos.x))
@@ -194,7 +210,19 @@ func set_block(global_pos: Vector3, block_type: int):
 		var lx = x - (cx * CHUNK_SIZE_X)
 		var lz = z - (cz * CHUNK_SIZE_Z)
 		c.set_block(lx, y, lz, block_type)
-		update_neighbor_meshes(cpos)
+		c.update_chunk_mesh() # Cập nhật lưới chunk hiện tại
+		
+		# Cập nhật lưới chunk hàng xóm nếu đập/đặt ở mép
+		var neighbors = []
+		if lx == 0: neighbors.append(cpos + Vector2i(-1, 0))
+		elif lx == CHUNK_SIZE_X - 1: neighbors.append(cpos + Vector2i(1, 0))
+		if lz == 0: neighbors.append(cpos + Vector2i(0, -1))
+		elif lz == CHUNK_SIZE_Z - 1: neighbors.append(cpos + Vector2i(0, 1))
+		
+		for npos in neighbors:
+			var n = get_chunk_safe(npos)
+			if n and n.is_data_ready:
+				n.update_chunk_mesh()
 		
 		# --- Xử lý Ánh sáng Đuốc ---
 		var pos = Vector3(x, y, z)
