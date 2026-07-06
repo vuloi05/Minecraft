@@ -71,6 +71,9 @@ func _ready():
 	spring_arm.position = Vector3(0, 1.5, 0)
 	spring_arm.collision_mask = 1
 	spring_arm.add_excluded_object(self.get_rid())
+	var arm_shape = SphereShape3D.new()
+	arm_shape.radius = 0.2
+	spring_arm.shape = arm_shape
 	add_child(spring_arm)
 	
 	remove_child(camera)
@@ -257,19 +260,19 @@ func update_camera_mode():
 		spring_arm.spring_length = 0.0
 		spring_arm.rotation.y = 0
 		camera.rotation = Vector3.ZERO
-		player_model.set_visible_model(false)
+		camera.cull_mask &= ~(1 << 1) # Tắt render Layer 2 (giấu mô hình)
 		hand_base.visible = true
 	elif camera_mode == 1:
 		spring_arm.spring_length = 4.0
 		spring_arm.rotation.y = 0
 		camera.rotation = Vector3.ZERO
-		player_model.set_visible_model(true)
+		camera.cull_mask |= (1 << 1) # Bật render Layer 2
 		hand_base.visible = false
 	elif camera_mode == 2:
 		spring_arm.spring_length = 4.0
 		spring_arm.rotation.y = PI
 		camera.rotation = Vector3(0, PI, 0)
-		player_model.set_visible_model(true)
+		camera.cull_mask |= (1 << 1) # Bật render Layer 2
 		hand_base.visible = false
 
 func take_damage(amount: int):
