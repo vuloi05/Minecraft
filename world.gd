@@ -6,11 +6,13 @@ const CHUNK_SIZE_Z = 16
 const RENDER_DISTANCE = 3
 
 var chunks = {} # Dictionary mapping Vector2i -> Chunk
+var chunks_mutex = Mutex.new() # Mutex để đồng bộ đa luồng khi đọc/ghi vào dictionary chunks
+
 var material = StandardMaterial3D.new()
 var noise = FastNoiseLite.new()
 var player: CharacterBody3D
 
-# Hàng đợi để sinh Chunk dần dần, tránh giật lag
+# Hàng đợi để sinh Chunk dần dần
 var chunk_queue = []
 
 var torches = {} # Vector3 -> OmniLight3D
@@ -62,25 +64,21 @@ func _process(delta):
 			var cpos = chunk_queue.pop_front()
 			# Chỉ sinh nếu nó vẫn còn nằm trong tầm nhìn
 			if abs(cpos.x - pcx) <= RENDER_DISTANCE and abs(cpos.y - pcz) <= RENDER_DISTANCE:
-				if not chunks.has(cpos):
+				chunks_mutex.lock()
+				var has_chunk = chunks.has(cpos)
+				chunks_mutex.unlock()
+				
+				if not has_chunk:
 					var chunk = Chunk.new(cpos, noise, material, self)
-					chunks[cpos] = chunk
-					add_child(chunk)
-					chunk.update_chunk_mesh()
-					update_neighbor_meshes(cpos)
 					
-					if is_initial_load:
-						loaded_initial_chunks += 1
-						var percent = int(float(loaded_initial_chunks) / total_initial_chunks * 100)
-						if player and player.ui and player.ui.has_method("update_loading"):
-							player.ui.update_loading(percent)
-						if loaded_initial_chunks >= total_initial_chunks:
-							is_initial_load = false
-							if player.has_method("finish_loading"):
-								player.finish_loading()
-							if player.ui and player.ui.has_method("finish_loading"):
-								player.ui.finish_loading()
-		
+					chunks_mutex.lock()
+					chunks[cpos] = chunk
+					chunks_mutex.unlock()
+					
+					add_child(chunk)
+					
+					# Giao việc sinh khối và tạo Mesh cho WorkerThreadPool (Luồng ngầm)
+					WorkerThreadPool.add_task(chunk.thread_generate)
 		# --- Xử lý sinh Zombie vào ban đêm ---
 		var sun = get_parent().get_node_or_null("DirectionalLight3D")
 		# Khi rotation.x của mặt trời nhỏ hơn 0 tức là nó đang chiếu từ dưới lên -> Ban đêm
@@ -109,6 +107,22 @@ func spawn_zombie():
 	z.player = player
 	add_child(z)
 
+func on_chunk_generated(cpos: Vector2i):
+	# Callback từ chunk.gd khi luồng ngầm đã sinh Mesh xong
+	update_neighbor_meshes(cpos)
+	
+	if is_initial_load:
+		loaded_initial_chunks += 1
+		var percent = int(float(loaded_initial_chunks) / total_initial_chunks * 100)
+		if player and player.ui and player.ui.has_method("update_loading"):
+			player.ui.update_loading(percent)
+		if loaded_initial_chunks >= total_initial_chunks:
+			is_initial_load = false
+			if player.has_method("finish_loading"):
+				player.finish_loading()
+			if player.ui and player.ui.has_method("finish_loading"):
+				player.ui.finish_loading()
+
 func update_chunks(player_chunk: Vector2i):
 	# Thêm chunk mới vào hàng đợi thay vì sinh ngay lập tức
 	for x in range(-RENDER_DISTANCE, RENDER_DISTANCE + 1):
@@ -126,9 +140,11 @@ func update_chunks(player_chunk: Vector2i):
 			chunks_to_remove.append(cpos)
 	
 	for cpos in chunks_to_remove:
+		chunks_mutex.lock()
 		var chunk = chunks[cpos]
-		chunk.queue_free()
 		chunks.erase(cpos)
+		chunks_mutex.unlock()
+		chunk.queue_free()
 
 func update_neighbor_meshes(cpos: Vector2i):
 	var neighbors = [
@@ -141,6 +157,12 @@ func update_neighbor_meshes(cpos: Vector2i):
 		if chunks.has(npos):
 			chunks[npos].update_chunk_mesh()
 
+func get_chunk_safe(pos: Vector2i) -> Chunk:
+	chunks_mutex.lock()
+	var c = chunks.get(pos)
+	chunks_mutex.unlock()
+	return c
+
 func get_block_global(x: int, y: int, z: int) -> int:
 	if y < 0 or y >= CHUNK_SIZE_Y: return 0
 	
@@ -148,10 +170,11 @@ func get_block_global(x: int, y: int, z: int) -> int:
 	var cz = int(floor(float(z) / CHUNK_SIZE_Z))
 	
 	var cpos = Vector2i(cx, cz)
-	if chunks.has(cpos):
+	var c = get_chunk_safe(cpos)
+	if c and c.is_data_ready:
 		var lx = x - (cx * CHUNK_SIZE_X)
 		var lz = z - (cz * CHUNK_SIZE_Z)
-		return chunks[cpos].blocks[lx][y][lz]
+		return c.blocks[lx][y][lz]
 	
 	return 0
 
@@ -166,10 +189,11 @@ func set_block(global_pos: Vector3, block_type: int):
 	var cz = int(floor(float(z) / CHUNK_SIZE_Z))
 	
 	var cpos = Vector2i(cx, cz)
-	if chunks.has(cpos):
+	var c = get_chunk_safe(cpos)
+	if c:
 		var lx = x - (cx * CHUNK_SIZE_X)
 		var lz = z - (cz * CHUNK_SIZE_Z)
-		chunks[cpos].set_block(lx, y, lz, block_type)
+		c.set_block(lx, y, lz, block_type)
 		update_neighbor_meshes(cpos)
 		
 		# --- Xử lý Ánh sáng Đuốc ---

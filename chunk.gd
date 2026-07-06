@@ -7,7 +7,8 @@ const CHUNK_SIZE_Z = 16
 
 var chunk_pos: Vector2i
 var blocks = []
-var st = SurfaceTool.new()
+var is_data_ready = false
+
 var mesh_instance = MeshInstance3D.new()
 var static_body = StaticBody3D.new()
 
@@ -28,8 +29,7 @@ func _init(_pos: Vector2i, _noise: FastNoiseLite, _mat: StandardMaterial3D, _wor
 	mesh_instance.add_child(static_body)
 	static_body.add_to_group("blocks")
 	mesh_instance.material_override = _mat
-	
-	generate_blocks()
+	# Không gọi generate_blocks() ở đây nữa, sẽ được gọi trong thread
 
 func generate_blocks():
 	blocks.resize(CHUNK_SIZE_X)
@@ -69,6 +69,8 @@ func generate_blocks():
 				blocks[x][terrain_height + 3][z-1] = 4
 				blocks[x][terrain_height + 3][z+1] = 4
 
+	is_data_ready = true
+
 func get_block(x: int, y: int, z: int) -> int:
 	if x >= 0 and x < CHUNK_SIZE_X and y >= 0 and y < CHUNK_SIZE_Y and z >= 0 and z < CHUNK_SIZE_Z:
 		return blocks[x][y][z]
@@ -107,29 +109,76 @@ func get_collision_shape() -> CollisionShape3D:
 		return shape
 
 func update_chunk_mesh():
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var local_st = SurfaceTool.new()
+	local_st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	
 	active_collisions = 0
 	var has_blocks = false
+	var block_shapes = []
 	
 	for x in range(CHUNK_SIZE_X):
 		for y in range(CHUNK_SIZE_Y):
 			for z in range(CHUNK_SIZE_Z):
 				if blocks[x][y][z] > 0:
 					if is_block_exposed(x, y, z):
-						create_block_mesh(x, y, z)
-						var shape = get_collision_shape()
-						shape.position = Vector3(x, y, z)
-						shape.disabled = false
+						create_block_mesh(local_st, x, y, z)
+						block_shapes.append(Vector3(x, y, z))
 						has_blocks = true
 	
-	for i in range(active_collisions, collision_pool.size()):
-		collision_pool[i].disabled = true
-	
 	if has_blocks:
-		mesh_instance.mesh = st.commit()
+		mesh_instance.mesh = local_st.commit()
 	else:
 		mesh_instance.mesh = null
+		
+	for i in range(block_shapes.size()):
+		var shape = get_collision_shape()
+		shape.position = block_shapes[i]
+		shape.disabled = false
+		
+	for i in range(block_shapes.size(), collision_pool.size()):
+		collision_pool[i].disabled = true
+
+func thread_generate():
+	generate_blocks()
+	
+	var local_st = SurfaceTool.new()
+	local_st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	
+	var has_blocks = false
+	var block_shapes = []
+	
+	for x in range(CHUNK_SIZE_X):
+		for y in range(CHUNK_SIZE_Y):
+			for z in range(CHUNK_SIZE_Z):
+				if blocks[x][y][z] > 0:
+					if is_block_exposed(x, y, z):
+						create_block_mesh(local_st, x, y, z)
+						block_shapes.append(Vector3(x, y, z))
+						has_blocks = true
+						
+	var mesh = null
+	if has_blocks:
+		mesh = local_st.commit()
+		
+	call_deferred("apply_mesh_and_collision", mesh, block_shapes)
+
+func apply_mesh_and_collision(mesh, block_shapes: Array):
+	if mesh:
+		mesh_instance.mesh = mesh
+	else:
+		mesh_instance.mesh = null
+		
+	active_collisions = 0
+	for i in range(block_shapes.size()):
+		var shape = get_collision_shape()
+		shape.position = block_shapes[i]
+		shape.disabled = false
+		
+	for i in range(block_shapes.size(), collision_pool.size()):
+		collision_pool[i].disabled = true
+		
+	if world_ref.has_method("on_chunk_generated"):
+		world_ref.on_chunk_generated(chunk_pos)
 
 func get_block_color(block_id: int) -> Color:
 	if block_id == 1: return Color(0.3, 0.6, 0.2) # Cỏ (Base)
@@ -141,17 +190,17 @@ func get_block_color(block_id: int) -> Color:
 	elif block_id == 8: return Color(0.52, 0.37, 0.26) # Đất
 	return Color(1, 1, 1)
 
-func add_quad(v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, color: Color):
-	st.set_normal(normal)
-	st.set_color(color)
-	st.set_uv(Vector2(0, 0)); st.add_vertex(v0)
-	st.set_uv(Vector2(1, 0)); st.add_vertex(v1)
-	st.set_uv(Vector2(1, 1)); st.add_vertex(v2)
-	st.set_uv(Vector2(0, 0)); st.add_vertex(v0)
-	st.set_uv(Vector2(1, 1)); st.add_vertex(v2)
-	st.set_uv(Vector2(0, 1)); st.add_vertex(v3)
+func add_quad(local_st: SurfaceTool, v0: Vector3, v1: Vector3, v2: Vector3, v3: Vector3, normal: Vector3, color: Color):
+	local_st.set_normal(normal)
+	local_st.set_color(color)
+	local_st.set_uv(Vector2(0, 0)); local_st.add_vertex(v0)
+	local_st.set_uv(Vector2(1, 0)); local_st.add_vertex(v1)
+	local_st.set_uv(Vector2(1, 1)); local_st.add_vertex(v2)
+	local_st.set_uv(Vector2(0, 0)); local_st.add_vertex(v0)
+	local_st.set_uv(Vector2(1, 1)); local_st.add_vertex(v2)
+	local_st.set_uv(Vector2(0, 1)); local_st.add_vertex(v3)
 
-func create_block_mesh(x: int, y: int, z: int):
+func create_block_mesh(local_st: SurfaceTool, x: int, y: int, z: int):
 	var block_id = blocks[x][y][z]
 	if block_id == 0 or block_id == 5: return # Không vẽ Air và Đuốc (Đuốc vẽ bằng Sprite3D)
 	
@@ -180,9 +229,9 @@ func create_block_mesh(x: int, y: int, z: int):
 	var v6 = pos + Vector3(v_sx, v_sy + y_offset, v_sz)
 	var v7 = pos + Vector3(-v_sx, v_sy + y_offset, v_sz)
 
-	if is_transparent(get_block(x, y, z + 1)): add_quad(v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
-	if is_transparent(get_block(x, y, z - 1)): add_quad(v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
-	if is_transparent(get_block(x + 1, y, z)): add_quad(v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
-	if is_transparent(get_block(x - 1, y, z)): add_quad(v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
-	if is_transparent(get_block(x, y + 1, z)): add_quad(v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
-	if is_transparent(get_block(x, y - 1, z)): add_quad(v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
+	if is_transparent(get_block(x, y, z + 1)): add_quad(local_st, v4, v7, v6, v5, Vector3(0, 0, 1), color_side)
+	if is_transparent(get_block(x, y, z - 1)): add_quad(local_st, v1, v2, v3, v0, Vector3(0, 0, -1), color_side)
+	if is_transparent(get_block(x + 1, y, z)): add_quad(local_st, v5, v6, v2, v1, Vector3(1, 0, 0), color_side)
+	if is_transparent(get_block(x - 1, y, z)): add_quad(local_st, v0, v3, v7, v4, Vector3(-1, 0, 0), color_side)
+	if is_transparent(get_block(x, y + 1, z)): add_quad(local_st, v7, v3, v2, v6, Vector3(0, 1, 0), color_top)
+	if is_transparent(get_block(x, y - 1, z)): add_quad(local_st, v0, v4, v5, v1, Vector3(0, -1, 0), color_bottom)
