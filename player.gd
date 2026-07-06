@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-const SPEED = 4.3
+const SPEED = 3.5
 const JUMP_VELOCITY = 8.5
 
 # Thay vì dùng trọng lực mặc định (9.8), tăng mạnh trọng lực lên để nhân vật rớt xuống nhanh, cảm giác nặng nề chân thực hơn giống Minecraft
