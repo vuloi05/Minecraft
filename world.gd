@@ -90,7 +90,7 @@ func _process(delta):
 				zombie_timer = 0.0
 				var current_zombies = get_tree().get_nodes_in_group("mobs").size()
 				if current_zombies < 5: # Giới hạn tối đa 5 Zombie
-					spawn_zombie()
+					pass # spawn_zombie() - Tạm thời tắt quái vật theo yêu cầu của user
 		else:
 			# Nếu là ban ngày, tiêu diệt toàn bộ zombie (Zombie cháy nắng)
 			var zombies = get_tree().get_nodes_in_group("mobs")
