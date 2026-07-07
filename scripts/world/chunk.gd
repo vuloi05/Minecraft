@@ -124,7 +124,12 @@ func generate_blocks():
 
 func get_block(x: int, y: int, z: int) -> int:
 	if x >= 0 and x < CHUNK_SIZE_X and y >= 0 and y < CHUNK_SIZE_Y and z >= 0 and z < CHUNK_SIZE_Z:
-		return blocks[x][y][z]
+		if blocks.size() > x and blocks[x].size() > y and blocks[x][y].size() > z:
+			return blocks[x][y][z]
+		return 0
+	
+	if y < 0 or y >= CHUNK_SIZE_Y:
+		return 0
 	
 	# Gọi world_ref nếu quét ra bên ngoài biên của Chunk này
 	var global_x = chunk_pos.x * CHUNK_SIZE_X + x
@@ -134,7 +139,6 @@ func get_block(x: int, y: int, z: int) -> int:
 func set_block(x: int, y: int, z: int, block_type: int):
 	if x >= 0 and x < CHUNK_SIZE_X and y >= 0 and y < CHUNK_SIZE_Y and z >= 0 and z < CHUNK_SIZE_Z:
 		blocks[x][y][z] = block_type
-		update_chunk_mesh()
 
 func is_transparent(id: int) -> bool:
 	return id == 0 or id == 4 or id == 5 # 0: Air, 4: Lá, 5: Đuốc
@@ -159,13 +163,22 @@ func get_collision_shape() -> CollisionShape3D:
 		active_collisions += 1
 		return shape
 
+func hide_block_collision_at(lx: int, ly: int, lz: int):
+	# Ẩn collision tại vị trí block vừa bị đào để người chơi không đi qua "block ma"
+	var target_pos = Vector3(lx, ly, lz)
+	for i in range(active_collisions):
+		if i < collision_pool.size() and collision_pool[i].position == target_pos:
+			collision_pool[i].disabled = true
+			break
+
 func update_chunk_mesh():
-	# Gọi đồng bộ trên Main Thread khi đập/đặt block
+	# Chạy đồng bộ trên Main Thread vì giờ lưới đã được tối ưu siêu tốc
 	thread_update_mesh_logic(true)
 
 func thread_generate():
 	generate_blocks()
-	thread_update_mesh_logic(false)
+	# Chuyển việc vẽ lưới sang Main Thread để tránh xung đột đọc/ghi mảng blocks với thao tác đào block
+	call_deferred("thread_update_mesh_logic", false)
 
 func thread_update_mesh():
 	# Gọi bất đồng bộ (Luồng ngầm) khi cần cập nhật hàng xóm
@@ -223,10 +236,10 @@ func apply_mesh_and_collision(mesh, block_shapes: Array):
 	for i in range(block_shapes.size(), collision_pool.size()):
 		collision_pool[i].disabled = true
 		
-	is_mesh_ready = true
-		
-	if world_ref.has_method("on_chunk_generated"):
-		world_ref.on_chunk_generated(chunk_pos)
+	if not is_mesh_ready:
+		is_mesh_ready = true
+		if world_ref.has_method("on_chunk_generated"):
+			world_ref.on_chunk_generated(chunk_pos)
 
 func get_block_color(block_id: int) -> Color:
 	if block_id == 1: return Color(0.3, 0.6, 0.2) # Cỏ (Base)
@@ -320,10 +333,10 @@ func create_block_mesh(local_st: SurfaceTool, x: int, y: int, z: int):
 	var v6 = pos + Vector3(v_sx, v_sy + y_offset, v_sz)
 	var v7 = pos + Vector3(-v_sx, v_sy + y_offset, v_sz)
 
-	# Bỏ qua kiểm tra is_block_exposed nếu là Đuốc vì đuốc nhỏ luôn thấy các mặt
-	if block_id == 5 or is_block_exposed(x, y, z + 1): add_quad(local_st, v4, v7, v6, v5, Vector3(0, 0, 1), uv_side, side_color)
-	if block_id == 5 or is_block_exposed(x, y, z - 1): add_quad(local_st, v1, v2, v3, v0, Vector3(0, 0, -1), uv_side, side_color)
-	if block_id == 5 or is_block_exposed(x + 1, y, z): add_quad(local_st, v5, v6, v2, v1, Vector3(1, 0, 0), uv_side, side_color)
-	if block_id == 5 or is_block_exposed(x - 1, y, z): add_quad(local_st, v0, v3, v7, v4, Vector3(-1, 0, 0), uv_side, side_color)
-	if block_id == 5 or is_block_exposed(x, y + 1, z): add_quad(local_st, v7, v3, v2, v6, Vector3(0, 1, 0), uv_top, top_color)
-	if block_id == 5 or is_block_exposed(x, y - 1, z): add_quad(local_st, v0, v4, v5, v1, Vector3(0, -1, 0), uv_bottom, bottom_color)
+	# Bỏ qua kiểm tra is_transparent nếu là Đuốc vì đuốc nhỏ luôn thấy các mặt
+	if block_id == 5 or is_transparent(get_block(x, y, z + 1)): add_quad(local_st, v4, v7, v6, v5, Vector3(0, 0, 1), uv_side, side_color)
+	if block_id == 5 or is_transparent(get_block(x, y, z - 1)): add_quad(local_st, v1, v2, v3, v0, Vector3(0, 0, -1), uv_side, side_color)
+	if block_id == 5 or is_transparent(get_block(x + 1, y, z)): add_quad(local_st, v5, v6, v2, v1, Vector3(1, 0, 0), uv_side, side_color)
+	if block_id == 5 or is_transparent(get_block(x - 1, y, z)): add_quad(local_st, v0, v3, v7, v4, Vector3(-1, 0, 0), uv_side, side_color)
+	if block_id == 5 or is_transparent(get_block(x, y + 1, z)): add_quad(local_st, v7, v3, v2, v6, Vector3(0, 1, 0), uv_top, top_color)
+	if block_id == 5 or is_transparent(get_block(x, y - 1, z)): add_quad(local_st, v0, v4, v5, v1, Vector3(0, -1, 0), uv_bottom, bottom_color)

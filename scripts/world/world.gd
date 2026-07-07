@@ -125,12 +125,10 @@ func spawn_zombie():
 	add_child(z)
 
 func on_chunk_generated(cpos: Vector2i):
+	update_neighbor_meshes(cpos)
 	chunks_mutex.lock()
 	active_threads -= 1
 	chunks_mutex.unlock()
-	
-	# Gọi luồng ngầm update hàng xóm thay vì update đồng bộ trên Main Thread
-	update_neighbor_meshes_async(cpos)
 	
 	if is_initial_load:
 		loaded_initial_chunks += 1
@@ -167,7 +165,7 @@ func update_chunks(player_chunk: Vector2i):
 		chunks_mutex.unlock()
 		chunk.schedule_free()
 
-func update_neighbor_meshes_async(cpos: Vector2i):
+func update_neighbor_meshes(cpos: Vector2i):
 	var neighbors = [
 		cpos + Vector2i(1, 0),
 		cpos + Vector2i(-1, 0),
@@ -180,8 +178,8 @@ func update_neighbor_meshes_async(cpos: Vector2i):
 		if chunks.has(npos):
 			var c = chunks[npos]
 			if c.is_data_ready and not c.is_meshing:
-				c.is_meshing = true
-				c.mesh_task_id = WorkerThreadPool.add_task(c.thread_update_mesh)
+				# Dùng call_deferred để chia tải lên Main Thread, tránh giật lag khi tải nhiều chunk
+				c.call_deferred("update_chunk_mesh")
 	chunks_mutex.unlock()
 
 func get_chunk_safe(pos: Vector2i) -> Chunk:
@@ -223,7 +221,13 @@ func set_block(global_pos: Vector3, block_type: int):
 		var lx = x - (cx * CHUNK_SIZE_X)
 		var lz = z - (cz * CHUNK_SIZE_Z)
 		c.set_block(lx, y, lz, block_type)
-		c.update_chunk_mesh() # Cập nhật lưới chunk hiện tại
+		
+		# Ẩn collision ngay lập tức để người chơi không va vào "block ma"
+		if block_type == 0:
+			c.hide_block_collision_at(lx, y, lz)
+		
+		# Rebuild mesh bất đồng bộ (không giật Main Thread)
+		c.update_chunk_mesh()
 		
 		# Cập nhật lưới chunk hàng xóm nếu đập/đặt ở mép
 		var neighbors = []
@@ -263,14 +267,17 @@ func set_block(global_pos: Vector3, block_type: int):
 				torches[pos].queue_free()
 				torches.erase(pos)
 
+var _item_scene_cache = null
+
 func spawn_item(id: int, count: int, pos: Vector3):
-	var item_scene = load("res://scenes/ItemEntity.tscn")
-	if item_scene:
-		var item = item_scene.instantiate()
+	if _item_scene_cache == null:
+		_item_scene_cache = load("res://scenes/ItemEntity.tscn")
+	if _item_scene_cache:
+		var item = _item_scene_cache.instantiate()
 		item.item_id = id
 		item.count = count
 		item.position = pos + Vector3(0.5, 0.5, 0.5) # Center of the block
 		
 		# Thêm lực bật ngẫu nhiên nhẹ lên trên
 		item.linear_velocity = Vector3(randf_range(-1.0, 1.0), randf_range(2.0, 4.0), randf_range(-1.0, 1.0))
-		add_child(item)
+		call_deferred("add_child", item)

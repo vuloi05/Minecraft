@@ -1,6 +1,9 @@
 extends RigidBody3D
 class_name ItemEntity
 
+static var _atlas_cache: Texture2D = null
+static var _tex_cache: Dictionary = {}
+
 var item_id: int = 0
 var count: int = 1
 var bob_time: float = 0.0
@@ -31,14 +34,19 @@ func _ready():
 			sprite.show()
 			block_mesh_node.hide()
 			if b_data.has("texture"):
-				var tex_item = "res://assets/textures/items/" + b_data["texture"]
-				var tex_block = "res://assets/textures/blocks/" + b_data["texture"]
+				var tex_name = b_data["texture"]
 				var tex = null
 				
-				if FileAccess.file_exists(tex_item) or FileAccess.file_exists(tex_item + ".import"):
-					tex = load(tex_item) as Texture2D
-				elif FileAccess.file_exists(tex_block) or FileAccess.file_exists(tex_block + ".import"):
-					tex = load(tex_block) as Texture2D
+				if _tex_cache.has(tex_name):
+					tex = _tex_cache[tex_name]
+				else:
+					var tex_item = "res://assets/textures/items/" + tex_name
+					var tex_block = "res://assets/textures/blocks/" + tex_name
+					if FileAccess.file_exists(tex_item) or FileAccess.file_exists(tex_item + ".import"):
+						tex = load(tex_item) as Texture2D
+					elif FileAccess.file_exists(tex_block) or FileAccess.file_exists(tex_block + ".import"):
+						tex = load(tex_block) as Texture2D
+					_tex_cache[tex_name] = tex
 					
 				if tex:
 					sprite.texture = tex
@@ -108,9 +116,10 @@ func _build_block_mesh():
 	var mesh = st.commit()
 	
 	var mat = StandardMaterial3D.new()
-	var atlas = load("res://assets/textures/atlas.png")
-	if atlas:
-		mat.albedo_texture = atlas
+	if _atlas_cache == null:
+		_atlas_cache = load("res://assets/textures/atlas.png")
+	if _atlas_cache:
+		mat.albedo_texture = _atlas_cache
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	mat.no_depth_test = false
 	
