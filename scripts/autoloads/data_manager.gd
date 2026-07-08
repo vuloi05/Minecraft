@@ -30,7 +30,38 @@ var int_to_string_id = {
 	22: "iron_pickaxe",
 	23: "iron_axe",
 	24: "iron_sword",
-	25: "iron_shovel"
+	25: "iron_shovel",
+	26: "sand",
+	27: "gravel",
+	28: "water",
+	29: "cobblestone",
+	30: "glass",
+	31: "bedrock",
+	32: "coal",
+	33: "iron_ingot",
+	34: "diamond",
+	35: "diamond_pickaxe",
+	36: "diamond_axe",
+	37: "diamond_sword",
+	38: "diamond_shovel",
+	39: "water_bucket",
+	40: "sandstone",
+	41: "cactus",
+	42: "dead_bush",
+	43: "snow_block",
+	44: "ice",
+	45: "dandelion",
+	46: "poppy",
+	47: "brown_mushroom",
+	48: "red_mushroom",
+	49: "lava",
+	101: "water_flow_1",
+	102: "water_flow_2",
+	103: "water_flow_3",
+	104: "water_flow_4",
+	105: "water_flow_5",
+	106: "water_flow_6",
+	107: "water_flow_7"
 }
 
 # Ánh xạ ngược từ String ID sang Integer ID
@@ -43,6 +74,7 @@ func _ready():
 	
 	load_blocks_data()
 	load_recipes_and_tools()
+	load_smelting_recipes()
 	load_uv_map()
 
 var uv_map = {}
@@ -96,6 +128,25 @@ func load_recipes_and_tools():
 	else:
 		push_error("Không tìm thấy docs/crafting_recipes.json")
 
+var smelting_recipes = []
+var fuels = {}
+
+func load_smelting_recipes():
+	var file = FileAccess.open("res://docs/smelting_recipes.json", FileAccess.READ)
+	if file:
+		var content = file.get_as_text()
+		var json = JSON.new()
+		if json.parse(content) == OK:
+			var data = json.get_data()
+			if data.has("fuels"):
+				fuels = data["fuels"]
+			if data.has("recipes"):
+				smelting_recipes = data["recipes"]
+		else:
+			push_error("Lỗi phân tích cú pháp smelting_recipes.json")
+	else:
+		push_error("Không tìm thấy docs/smelting_recipes.json")
+
 func get_block_data(block_id: int) -> Dictionary:
 	if not int_to_string_id.has(block_id):
 		return {}
@@ -110,9 +161,17 @@ func get_item_int_id(string_id: String) -> int:
 	return 0 # Trả về 0 nếu không tìm thấy
 
 func get_tool_tier_of_item(item_id: int) -> int:
-	# Tạm thời hardcode tier từ ID vật phẩm dựa theo crafting_recipes.json
-	if item_id == 11: return 1 # wooden
-	if item_id == 6: return 2 # stone
+	var b_data = get_block_data(item_id)
+	if b_data.has("tool_tier"):
+		return b_data["tool_tier"]
+		
+	# Fallback (old hardcoded)
+	var sid = int_to_string_id.get(item_id, "")
+	if sid.begins_with("wooden_") or sid.begins_with("golden_"): return 1
+	if sid.begins_with("stone_"): return 2
+	if sid.begins_with("iron_"): return 3
+	if sid.begins_with("diamond_"): return 4
+	if sid.begins_with("netherite_"): return 5
 	return 0 # Tay không hoặc item thường
 
 func get_tool_multiplier(tier: int) -> float:
@@ -120,6 +179,7 @@ func get_tool_multiplier(tier: int) -> float:
 	if tier == 2: return 4.0
 	if tier == 3: return 6.0
 	if tier == 4: return 8.0
+	if tier == 5: return 10.0 # Netherite
 	return 1.0 # Tier 0
 
 func get_mining_time(block_id: int, tool_id: int) -> float:
@@ -136,9 +196,10 @@ func get_mining_time(block_id: int, tool_id: int) -> float:
 	var best_tool = b_data.get("best_tool", null)
 	var current_tool_tier = get_tool_tier_of_item(tool_id)
 	
+	var sid = int_to_string_id.get(tool_id, "")
 	var is_correct_tool = false
-	if best_tool == "pickaxe" and (tool_id == 6 or tool_id == 11): is_correct_tool = true
-	# (nếu có rìu, xẻng thì thêm vào đây)
+	if best_tool != null and sid.ends_with("_" + best_tool): 
+		is_correct_tool = true
 	
 	var base_time = hardness
 	if is_correct_tool or best_tool == null:

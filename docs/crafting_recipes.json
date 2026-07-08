@@ -490,6 +490,255 @@
             ],
             "tool_tier": 3,
             "note": "Xẻng sắt."
+        },
+        {
+            "id": "diamond_pickaxe",
+            "output": {
+                "item": "diamond_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "diamond",
+                    "diamond",
+                    "diamond"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ],
+            "note": "3 kim cương + 2 que -> 1 cúp kim cương."
+        },
+        {
+            "id": "diamond_axe",
+            "output": {
+                "item": "diamond_axe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "diamond",
+                    "diamond"
+                ],
+                [
+                    "diamond",
+                    "stick"
+                ],
+                [
+                    null,
+                    "stick"
+                ]
+            ],
+            "note": "3 kim cương góc + 2 que -> 1 rìu kim cương."
+        },
+        {
+            "id": "diamond_sword",
+            "output": {
+                "item": "diamond_sword",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "diamond"
+                ],
+                [
+                    "diamond"
+                ],
+                [
+                    "stick"
+                ]
+            ],
+            "note": "2 kim cương + 1 que dọc -> 1 kiếm kim cương."
+        },
+        {
+            "id": "diamond_shovel",
+            "output": {
+                "item": "diamond_shovel",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "diamond"
+                ],
+                [
+                    "stick"
+                ],
+                [
+                    "stick"
+                ]
+            ],
+            "note": "1 kim cương + 2 que dọc -> 1 xẻng kim cương."
+        },
+        {
+            "id": "wooden_pickaxe",
+            "output": {
+                "item": "wooden_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "oak_planks",
+                    "oak_planks",
+                    "oak_planks"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
+        },
+        {
+            "id": "stone_pickaxe",
+            "output": {
+                "item": "stone_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "cobblestone",
+                    "cobblestone",
+                    "cobblestone"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
+        },
+        {
+            "id": "iron_pickaxe",
+            "output": {
+                "item": "iron_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "iron_ingot",
+                    "iron_ingot",
+                    "iron_ingot"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
+        },
+        {
+            "id": "golden_pickaxe",
+            "output": {
+                "item": "golden_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "gold_ingot",
+                    "gold_ingot",
+                    "gold_ingot"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
+        },
+        {
+            "id": "diamond_pickaxe",
+            "output": {
+                "item": "diamond_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "diamond",
+                    "diamond",
+                    "diamond"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
+        },
+        {
+            "id": "netherite_pickaxe",
+            "output": {
+                "item": "netherite_pickaxe",
+                "count": 1
+            },
+            "grid": "crafting_table",
+            "shapeless": false,
+            "shape": [
+                [
+                    "netherite_ingot",
+                    "netherite_ingot",
+                    "netherite_ingot"
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ],
+                [
+                    null,
+                    "stick",
+                    null
+                ]
+            ]
         }
     ],
     "tool_tier_reference": {

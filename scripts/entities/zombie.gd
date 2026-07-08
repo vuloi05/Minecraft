@@ -62,3 +62,14 @@ func _physics_process(delta):
 		velocity.z = 0
 		
 	move_and_slide()
+
+var hp = 20
+
+func take_damage(amount: int, knockback_dir: Vector3 = Vector3.ZERO):
+	hp -= amount
+	if knockback_dir != Vector3.ZERO:
+		velocity = knockback_dir * 5.0
+		velocity.y = 4.0
+	print("Zombie bị đánh mất ", amount, " máu! Còn ", hp)
+	if hp <= 0:
+		queue_free()

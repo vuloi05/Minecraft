@@ -1,0 +1,34 @@
+{
+    "fuels": {
+        "coal": 80.0,
+        "oak_log": 15.0,
+        "oak_planks": 15.0,
+        "stick": 5.0
+    },
+    "recipes": [
+        {
+            "input": "cobblestone",
+            "output": "stone",
+            "cook_time": 10.0,
+            "experience": 0.1
+        },
+        {
+            "input": "sand",
+            "output": "glass",
+            "cook_time": 10.0,
+            "experience": 0.1
+        },
+        {
+            "input": "iron_ore",
+            "output": "iron_ingot",
+            "cook_time": 10.0,
+            "experience": 0.7
+        },
+        {
+            "input": "oak_log",
+            "output": "coal",
+            "cook_time": 10.0,
+            "experience": 0.15
+        }
+    ]
+}

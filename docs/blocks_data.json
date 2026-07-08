@@ -43,7 +43,12 @@
             "gravity_affected": false,
             "flammable": false,
             "note": "Đào ra Đất, không rơi ra chính nó (trừ khi có công cụ Silk Touch nếu sau này bổ sung enchant).",
-            "texture": "grass_block_side.png"
+            "texture": "grass_block_side.png",
+            "faces": {
+                "top": "grass_block_top",
+                "bottom": "dirt",
+                "side": "grass_block_side"
+            }
         },
         {
             "id": "stone",
@@ -93,7 +98,12 @@
             "gravity_affected": false,
             "flammable": true,
             "note": "Không bắt buộc cần rìu để rơi vật phẩm, rìu chỉ giúp chặt nhanh hơn.",
-            "texture": "oak_log.png"
+            "texture": "oak_log.png",
+            "faces": {
+                "top": "oak_log_top",
+                "bottom": "oak_log_top",
+                "side": "oak_log"
+            }
         },
         {
             "id": "oak_planks",
@@ -193,13 +203,13 @@
             "tool_tier_required": 2,
             "drops": [
                 {
-                    "item": "raw_iron",
+                    "item": "iron_ore",
                     "count": 1
                 }
             ],
             "gravity_affected": false,
             "flammable": false,
-            "note": "Cần cuốc đá trở lên mới rơi vật phẩm. Quặng thô (raw_iron) phải nung ở Lò nung mới ra thỏi sắt.",
+            "note": "Cần cuốc đá trở lên mới rơi vật phẩm. Quặng thô (iron_ore) phải nung ở Lò nung mới ra thỏi sắt.",
             "texture": "iron_ore.png"
         },
         {
@@ -290,7 +300,12 @@
             ],
             "gravity_affected": false,
             "flammable": true,
-            "texture": "crafting_table_front.png"
+            "texture": "crafting_table_front.png",
+            "faces": {
+                "top": "crafting_table_top",
+                "bottom": "oak_planks",
+                "side": "crafting_table_side"
+            }
         },
         {
             "id": "furnace",
@@ -306,7 +321,11 @@
             ],
             "gravity_affected": false,
             "flammable": false,
-            "texture": "furnace_front.png"
+            "texture": "furnace_front.png",
+            "faces": {
+                "top": "furnace_top",
+                "bottom": "furnace_top"
+            }
         },
         {
             "id": "chest",
@@ -403,30 +422,7 @@
             "texture": "stick.png",
             "is_item": true
         },
-        {
-            "id": "wooden_pickaxe",
-            "display_name": "Cúp Gỗ",
-            "hardness": 0,
-            "best_tool": null,
-            "tool_tier_required": 0,
-            "drops": [],
-            "gravity_affected": false,
-            "flammable": true,
-            "texture": "wooden_pickaxe.png",
-            "is_item": true
-        },
-        {
-            "id": "stone_pickaxe",
-            "display_name": "Cúp Đá",
-            "hardness": 0,
-            "best_tool": null,
-            "tool_tier_required": 0,
-            "drops": [],
-            "gravity_affected": false,
-            "flammable": false,
-            "texture": "stone_pickaxe.png",
-            "is_item": true
-        },
+
         {
             "id": "wooden_axe",
             "display_name": "Rìu Gỗ",
@@ -546,6 +542,448 @@
             "flammable": false,
             "texture": "iron_shovel.png",
             "is_item": true
+        },
+        {
+            "id": "water",
+            "display_name": "Nước",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "glass",
+            "display_name": "Kính",
+            "hardness": 0.3,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "is_transparent": true,
+            "texture": "glass.png"
+        },
+        {
+            "id": "bedrock",
+            "display_name": "Đá Đáy",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "bedrock.png"
+        },
+        {
+            "id": "coal",
+            "display_name": "Than",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "coal.png",
+            "is_item": true
+        },
+        {
+            "id": "iron_ingot",
+            "display_name": "Thỏi Sắt",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "iron_ingot.png",
+            "is_item": true
+        },
+        {
+            "id": "diamond",
+            "display_name": "Kim Cương",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond.png",
+            "is_item": true
+        },
+        {
+            "id": "diamond_pickaxe",
+            "display_name": "Cúp Kim Cương",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond_pickaxe.png",
+            "is_item": true
+        },
+        {
+            "id": "diamond_axe",
+            "display_name": "Rìu Kim Cương",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond_axe.png",
+            "is_item": true
+        },
+        {
+            "id": "diamond_sword",
+            "display_name": "Kiếm Kim Cương",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond_sword.png",
+            "is_item": true
+        },
+        {
+            "id": "diamond_shovel",
+            "display_name": "Xẻng Kim Cương",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "diamond_shovel.png",
+            "is_item": true
+        },
+        {
+            "id": "water",
+            "display_name": "Nước",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_bucket",
+            "display_name": "Xô Nước",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "water_bucket.png",
+            "is_item": true
+        },
+        {
+            "id": "water_flow_1",
+            "display_name": "Nước Chảy 1",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_2",
+            "display_name": "Nước Chảy 2",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_3",
+            "display_name": "Nước Chảy 3",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_4",
+            "display_name": "Nước Chảy 4",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_5",
+            "display_name": "Nước Chảy 5",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_6",
+            "display_name": "Nước Chảy 6",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "water_flow_7",
+            "display_name": "Nước Chảy 7",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "water_still.png"
+        },
+        {
+            "id": "sandstone",
+            "display_name": "Đá Sa Thạch",
+            "hardness": 0.8,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "sandstone",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "sandstone_side.png",
+            "faces": {
+                "top": "sandstone_top",
+                "bottom": "sandstone_bottom",
+                "side": "sandstone"
+            }
+        },
+        {
+            "id": "cactus",
+            "display_name": "Xương Rồng",
+            "hardness": 0.4,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "cactus",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "cactus_side.png",
+            "faces": {
+                "top": "cactus_top",
+                "bottom": "cactus_bottom",
+                "side": "cactus_side"
+            }
+        },
+        {
+            "id": "dead_bush",
+            "display_name": "Bụi Cây Khô",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "dead_bush.png"
+        },
+        {
+            "id": "snow_block",
+            "display_name": "Khối Tuyết",
+            "hardness": 0.2,
+            "best_tool": "shovel",
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "snowball",
+                    "count": 4
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "snow.png"
+        },
+        {
+            "id": "ice",
+            "display_name": "Băng",
+            "hardness": 0.5,
+            "best_tool": "pickaxe",
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "ice.png"
+        },
+        {
+            "id": "dandelion",
+            "display_name": "Bồ Công Anh",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "dandelion",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "dandelion.png"
+        },
+        {
+            "id": "poppy",
+            "display_name": "Hoa Anh Túc",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "poppy",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": true,
+            "texture": "poppy.png"
+        },
+        {
+            "id": "brown_mushroom",
+            "display_name": "Nấm Nâu",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "brown_mushroom",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "brown_mushroom.png"
+        },
+        {
+            "id": "red_mushroom",
+            "display_name": "Nấm Đỏ",
+            "hardness": 0,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [
+                {
+                    "item": "red_mushroom",
+                    "count": 1
+                }
+            ],
+            "gravity_affected": false,
+            "flammable": false,
+            "texture": "red_mushroom.png"
+        },
+        {
+            "id": "lava",
+            "display_name": "Dung Nham",
+            "hardness": -1,
+            "best_tool": null,
+            "tool_tier_required": 0,
+            "drops": [],
+            "gravity_affected": false,
+            "flammable": false,
+            "fluid": true,
+            "texture": "lava_still.png"
+        },
+        {
+            "id": "wooden_pickaxe",
+            "display_name": "Cúp Gỗ",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 1,
+            "attack_damage": 2,
+            "texture": "wooden_pickaxe.png",
+            "model_3d": "minecraft_wooden_pickaxe.glb"
+        },
+        {
+            "id": "golden_pickaxe",
+            "display_name": "Cúp Vàng",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 1,
+            "attack_damage": 2,
+            "texture": "golden_pickaxe.png",
+            "model_3d": "minecraft_golden_pickaxe.glb"
+        },
+        {
+            "id": "stone_pickaxe",
+            "display_name": "Cúp Đá",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 2,
+            "attack_damage": 3,
+            "texture": "stone_pickaxe.png",
+            "model_3d": "minecraft_stone_pickaxe.glb"
+        },
+        {
+            "id": "iron_pickaxe",
+            "display_name": "Cúp Sắt",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 3,
+            "attack_damage": 4,
+            "texture": "iron_pickaxe.png",
+            "model_3d": "minecraft_iron_pickaxe.glb"
+        },
+        {
+            "id": "diamond_pickaxe",
+            "display_name": "Cúp Kim Cương",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 4,
+            "attack_damage": 5,
+            "texture": "diamond_pickaxe.png",
+            "model_3d": "minecraft_diamond-pickaxe.glb"
+        },
+        {
+            "id": "netherite_pickaxe",
+            "display_name": "Cúp Netherite",
+            "is_item": true,
+            "tool_type": "pickaxe",
+            "tool_tier": 5,
+            "attack_damage": 6,
+            "texture": "netherite_pickaxe.png",
+            "model_3d": "minecraft_netherite_pickaxe.glb"
         }
     ]
 }

@@ -26,6 +26,12 @@ func _ready():
 	for i in range(46):
 		inv_data.append({"id": 0, "count": 0})
 		
+	# Cho sẵn Cát, Sỏi, Nước để test vật lý
+	inv_data[0] = {"id": 26, "count": 64} # Cát
+	inv_data[1] = {"id": 27, "count": 64} # Sỏi
+	inv_data[2] = {"id": 39, "count": 1} # Xô Nước
+	inv_data[3] = {"id": 6, "count": 1} # Cúp đá để đập block
+		
 	# --- MÀN HÌNH CHÍNH (HUD) ---
 	hud = Control.new()
 	hud.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -229,7 +235,9 @@ func _ready():
 	cursor_item.get_child(1).visible = false # Ẩn center
 	cursor_item.border.visible = false
 	$Control.add_child(cursor_item)
-	
+	for i in range(46):
+		update_slot(i, inv_data[i].id, inv_data[i].count)
+		
 	select_hotbar(0)
 
 func _process(delta):

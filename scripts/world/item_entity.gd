@@ -26,15 +26,28 @@ func _ready():
 	if b_data:
 		is_block = not b_data.get("is_item", false)
 		
+		# Flora and some specific blocks render as sprites
+		if item_id in [42, 45, 46, 47, 48, 5]: 
+			is_block = false
+		
 		if is_block:
 			sprite.hide()
 			block_mesh_node.show()
 			_build_block_mesh()
 		else:
-			sprite.show()
-			block_mesh_node.hide()
-			if b_data.has("texture"):
-				var tex_name = b_data["texture"]
+			if b_data.has("model_3d"):
+				sprite.hide()
+				block_mesh_node.hide()
+				var model_path = b_data["model_3d"]
+				var model_scene = load("res://assets/models/" + model_path)
+				if model_scene:
+					tool_model = model_scene.instantiate()
+					add_child(tool_model)
+					tool_model.scale = Vector3(0.3, 0.3, 0.3)
+			else:
+				sprite.show()
+				block_mesh_node.hide()
+				var tex_name = b_data.get("texture", "")
 				var tex = null
 				
 				if _tex_cache.has(tex_name):
@@ -52,20 +65,24 @@ func _ready():
 					sprite.texture = tex
 					var max_dim = max(tex.get_width(), tex.get_height())
 					if max_dim > 0:
-						sprite.pixel_size = 0.25 / float(max_dim)
+						sprite.pixel_size = 0.5 / float(max_dim)
 					else:
-						sprite.pixel_size = 0.015
+						sprite.pixel_size = 0.03
 
 	pickup_area.body_entered.connect(_on_body_entered)
+
+var tool_model: Node3D = null
 
 func _process(delta):
 	bob_time += delta * 2.0
 	var offset_y = sin(bob_time) * 0.1
 	sprite.position.y = offset_y
 	block_mesh_node.position.y = offset_y
+	if tool_model: tool_model.position.y = offset_y
 	
 	sprite.rotation.y += delta
 	block_mesh_node.rotation.y += delta
+	if tool_model: tool_model.rotation.y += delta
 
 func _on_body_entered(body):
 	if body.name == "Player" or body.has_method("take_damage"):

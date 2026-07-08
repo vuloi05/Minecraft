@@ -28,6 +28,7 @@ var hand_base: Node3D
 var hand_label: Label3D
 var hand_block: MeshInstance3D
 var hand_sprite: Sprite3D
+var hand_model: Node3D
 var current_hand_id = -1
 var bob_time = 0.0
 var hit_time = 0.0
@@ -104,16 +105,27 @@ func _ready():
 	hand_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST # Render pixel art sắc nét
 	hand_sprite.no_depth_test = true
 	hand_base.add_child(hand_sprite)
+	
+	hand_model = Node3D.new()
+	hand_base.add_child(hand_model)
 
 func update_hand(id: int):
 	hand_label.visible = false
 	hand_block.visible = false
 	hand_sprite.visible = false
+	hand_model.visible = false
 	
+	for child in hand_model.get_children():
+		child.queue_free()
+		
 	var b_data = DataManager.get_block_data(id)
 	var is_block = false
 	if b_data and not b_data.get("is_item", false):
 		is_block = true
+		
+	# Cây cỏ, đuốc sẽ vẽ dưới dạng sprite 2D
+	if id in [42, 45, 46, 47, 48, 5]:
+		is_block = false
 		
 	if is_block: # Blocks
 		hand_block.visible = true
@@ -185,14 +197,30 @@ func update_hand(id: int):
 		b_data = DataManager.get_block_data(id)
 		var tex = null
 		
-		if b_data and b_data.has("texture"):
-			var tex_block = "res://assets/textures/blocks/" + b_data["texture"]
-			var tex_item = "res://assets/textures/items/" + b_data["texture"]
+		if b_data:
+			if b_data.has("model_3d"):
+				var model_path = b_data["model_3d"]
+				var model_scene = load("res://assets/models/" + model_path)
+				if model_scene:
+					var model = model_scene.instantiate()
+					hand_model.add_child(model)
+					# Tăng kích thước Cúp trên tay cho phù hợp (Scale lớn hơn)
+					model.scale = Vector3(0.4, 0.4, 0.4)
+					# For pickaxe: rotation_degrees = Vector3(0, 90, 45)
+					# We can apply it here
+					model.rotation_degrees = Vector3(0, 90, 45)
+					hand_model.visible = true
+					return
 			
-			if FileAccess.file_exists(tex_block) or FileAccess.file_exists(tex_block + ".import"):
-				tex = load(tex_block) as Texture2D
-			elif FileAccess.file_exists(tex_item) or FileAccess.file_exists(tex_item + ".import"):
-				tex = load(tex_item) as Texture2D
+			if b_data.has("texture"):
+				var tex_str = b_data["texture"]
+				var tex_block = "res://assets/textures/blocks/" + tex_str
+				var tex_item = "res://assets/textures/items/" + tex_str
+				
+				if FileAccess.file_exists(tex_block) or FileAccess.file_exists(tex_block + ".import"):
+					tex = load(tex_block) as Texture2D
+				elif FileAccess.file_exists(tex_item) or FileAccess.file_exists(tex_item + ".import"):
+					tex = load(tex_item) as Texture2D
 				
 		if tex:
 			hand_sprite.texture = tex
@@ -268,6 +296,23 @@ func _unhandled_input(event):
 				ui.select_hotbar(new_idx)
 			return
 			
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if raycast.is_colliding():
+				var collider = raycast.get_collider()
+				if collider and collider != self and collider.has_method("take_damage"):
+					var selected_item = 0
+					if ui: selected_item = ui.get_selected_item_id()
+					var b_data = DataManager.get_block_data(selected_item)
+					var dmg = 1 # Sát thương cơ bản tay không
+					if b_data and b_data.has("attack_damage"):
+						dmg = b_data["attack_damage"]
+					
+					var dir = (collider.global_position - global_position).normalized()
+					collider.take_damage(dmg, dir)
+					
+					# Hiệu ứng vung tay mạnh
+					hit_time = PI/2 
+			
 		if raycast.is_colliding() and event.button_index == MOUSE_BUTTON_RIGHT:
 			var hit_point = raycast.get_collision_point()
 			var hit_normal = raycast.get_collision_normal()
@@ -283,28 +328,44 @@ func _unhandled_input(event):
 			var selected_block = 0
 			if ui: selected_block = ui.get_selected_item_id()
 			
-			# Ngăn đặt block nếu cầm công cụ
-			if selected_block == 0 or selected_block == 6 or selected_block == 11: return
+			var b_data = DataManager.get_block_data(selected_block)
+			if not b_data: return
+			
+			# Ngăn đặt block nếu cầm vật phẩm (ngoại trừ xô nước)
+			if b_data.has("is_item") and b_data["is_item"]:
+				if selected_block != 39: # 39 = water_bucket
+					return
 			
 			var block_pos = hit_point + hit_normal * 0.5
 			var grid_pos = Vector3(round(block_pos.x), round(block_pos.y), round(block_pos.z))
 			
-			# Kiểm tra va chạm Player
-			var p_pos = global_position
-			var px_min = p_pos.x - 0.4; var px_max = p_pos.x + 0.4
-			var py_min = p_pos.y;       var py_max = p_pos.y + 1.8
-			var pz_min = p_pos.z - 0.4; var pz_max = p_pos.z + 0.4
-			var bx_min = grid_pos.x - 0.5; var bx_max = grid_pos.x + 0.5
-			var by_min = grid_pos.y - 0.5; var by_max = grid_pos.y + 0.5
-			var bz_min = grid_pos.z - 0.5; var bz_max = grid_pos.z + 0.5
+			var place_block_id = selected_block
+			var is_solid_block = true
 			
-			if (px_min < bx_max and px_max > bx_min) and \
-			   (py_min < by_max and py_max > by_min) and \
-			   (pz_min < bz_max and pz_max > bz_min):
-				return
+			if selected_block == 39: # water_bucket
+				place_block_id = 28 # place water block
+				is_solid_block = false
+			elif place_block_id == 5: # Torch
+				is_solid_block = false
+			
+			# Kiểm tra va chạm Player (Chỉ chặn nếu là block đặc)
+			if is_solid_block:
+				var p_pos = global_position
+				var px_min = p_pos.x - 0.4; var px_max = p_pos.x + 0.4
+				var py_min = p_pos.y;       var py_max = p_pos.y + 1.8
+				var pz_min = p_pos.z - 0.4; var pz_max = p_pos.z + 0.4
+				var bx_min = grid_pos.x - 0.5; var bx_max = grid_pos.x + 0.5
+				var by_min = grid_pos.y - 0.5; var by_max = grid_pos.y + 0.5
+				var bz_min = grid_pos.z - 0.5; var bz_max = grid_pos.z + 0.5
 				
-			world_node.set_block(grid_pos, selected_block)
-			if ui: ui.consume_selected_item()
+				if (px_min < bx_max and px_max > bx_min) and \
+				   (py_min < by_max and py_max > by_min) and \
+				   (pz_min < bz_max and pz_max > bz_min):
+					return
+				
+			world_node.set_block(int(grid_pos.x), int(grid_pos.y), int(grid_pos.z), place_block_id)
+			if ui and selected_block != 39: # Tạm thời xô nước dùng không giới hạn
+				ui.consume_selected_item()
 	
 	if event is InputEventKey and event.pressed:
 		if is_loading: return
@@ -348,9 +409,12 @@ func update_camera_mode():
 		camera.cull_mask |= (1 << 1) # Bật render Layer 2
 		hand_base.visible = false
 
-func take_damage(amount: int):
+func take_damage(amount: int, knockback_dir: Vector3 = Vector3.ZERO):
 	hp -= amount
 	if hp < 0: hp = 0
+	if knockback_dir != Vector3.ZERO:
+		velocity = knockback_dir * 5.0
+		velocity.y = 4.0
 	if ui: ui.update_hp(hp)
 	print("Mất máu! HP còn: ", hp)
 	if hp == 0:
@@ -450,7 +514,7 @@ func _physics_process(delta):
 				if ui: ui.update_mining_ui(mine_timer, req_time)
 				
 				if mine_timer >= req_time:
-					world_node.set_block(grid_pos, 0)
+					world_node.set_block(int(grid_pos.x), int(grid_pos.y), int(grid_pos.z), 0)
 					
 					# Rớt đồ xuống đất thay vì hút thẳng vào túi
 					var drops = DataManager.get_drops(block_id, selected_item)
@@ -466,11 +530,28 @@ func _physics_process(delta):
 		mine_timer = 0.0
 		if ui: ui.update_mining_ui(0, 1)
 
-	if not is_on_floor():
-		velocity.y -= gravity * delta
+	var is_in_water = false
+	var current_speed = SPEED
+	
+	if world_node:
+		var p_grid_pos = Vector3(round(global_position.x), round(global_position.y), round(global_position.z))
+		var b_feet = world_node.get_block_global(p_grid_pos.x, p_grid_pos.y, p_grid_pos.z)
+		if b_feet == 28 or (b_feet >= 101 and b_feet <= 103):
+			is_in_water = true
+			current_speed = SPEED * 0.5
 
-	if Input.is_physical_key_pressed(KEY_SPACE) and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+	if not is_on_floor():
+		if is_in_water:
+			velocity.y -= (gravity * 0.2) * delta
+			velocity.y = max(velocity.y, -3.0) # Giới hạn tốc độ chìm
+		else:
+			velocity.y -= gravity * delta
+
+	if Input.is_physical_key_pressed(KEY_SPACE):
+		if is_on_floor():
+			velocity.y = JUMP_VELOCITY
+		elif is_in_water:
+			velocity.y = JUMP_VELOCITY * 0.6 # Bơi lên
 
 	var input_dir = Vector2.ZERO
 	if Input.is_physical_key_pressed(KEY_W): input_dir.y -= 1
@@ -481,11 +562,11 @@ func _physics_process(delta):
 
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.x = direction.x * current_speed
+		velocity.z = direction.z * current_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0, current_speed)
+		velocity.z = move_toward(velocity.z, 0, current_speed)
 
 	# Chạy Animation cho Mô hình
 	var is_mining = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
